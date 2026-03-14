@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Glide map: Undersea Oasis -->
+<MinigameMap>
+    <TemplatePack path="glide/undersea_oasis"/>
+    <SpawnPos x="0" y="80" z="0"/>
+    <LevelRules pvp="false" naturalRegeneration="false" keepInventory="false" timeOfDay="6000" weather="false"/>
+    <ForcedBiome id="minecraft:ocean"/>
+    <Checkpoint index="0" x="0" y="75" z="55" radius="5"/>
+    <Checkpoint index="1" x="40" y="68" z="85" radius="5"/>
+    <Checkpoint index="2" x="75" y="60" z="65" radius="5"/>
+    <Checkpoint index="3" x="95" y="52" z="25" radius="5"/>
+    <Checkpoint index="4" x="55" y="45" z="0" radius="5"/>
+</MinigameMap>

@@ -2,6 +2,7 @@ package wily.legacy.minigame.controller;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -10,9 +11,14 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
+import net.minecraft.world.phys.Vec3;
 import wily.legacy.Legacy4J;
+import wily.legacy.fantasy.MinigameMapTemplateLoader;
+import wily.legacy.fantasy.RuntimeWorldHandle;
 import wily.legacy.minigame.Minigame;
+import wily.legacy.minigame.grf.GrfMap;
 import wily.legacy.minigame.networking.S2CLeaderboardPayload;
+import wily.legacy.minigame.networking.S2CMapTransitionPayload;
 
 import java.util.*;
 
@@ -20,6 +26,9 @@ import java.util.*;
  * Tumble minigame controller: Players fight on diminishing snow floors.
  * Players throw snowballs to break blocks under enemies, trying to make them fall.
  * The last player remaining on a platform wins.
+ *
+ * Loads the arena from a .mcsave template pack if one is available,
+ * otherwise falls back to procedurally generating snow floor layers.
  */
 public class TumbleMinigameController extends AbstractMinigameController<TumbleMinigameController> {
 
@@ -35,6 +44,7 @@ public class TumbleMinigameController extends AbstractMinigameController<TumbleM
     private int currentRound = 0;
     private int currentLayer = 0;
     private final RandomSource random = new XoroshiroRandomSource(System.currentTimeMillis());
+    private RuntimeWorldHandle worldHandle = null;
 
     public enum TumblePhase { COUNTDOWN, PLAYING, ROUND_END }
 
@@ -48,12 +58,40 @@ public class TumbleMinigameController extends AbstractMinigameController<TumbleM
         phaseTimer = 0;
         currentRound = 0;
         playerStates.clear();
+
+        ResourceLocation mapId = data.mapId();
+        GrfMap grfMap = GrfMap.load(mapId);
+        ResourceLocation templateId = grfMap != null ? grfMap.getTemplatePackId() : mapId;
+
+        broadcastToAllPlayers(new S2CMapTransitionPayload(mapId, Minigame.TUMBLE.getName(), 60));
+
+        if (MinigameMapTemplateLoader.hasTemplate(level.getServer(), templateId)) {
+            RuntimeWorldHandle handle = MinigameMapTemplateLoader.loadTemplateHandle(level.getServer(), templateId);
+            if (handle != null) {
+                worldHandle = handle;
+                this.level = handle.asWorld();
+                Legacy4J.LOGGER.info("[Legacy4J Tumble] Loaded template world '{}' for map '{}'", templateId, mapId);
+            }
+        }
+
+        Vec3 spawnVec = (grfMap != null && grfMap.getSpawnPos() != null)
+                ? grfMap.getSpawnPos()
+                : new Vec3(level.getSharedSpawnPos().getX(), FLOOR_BASE_Y + (LAYERS - 1) * 8 + 1,
+                           level.getSharedSpawnPos().getZ());
+
         for (UUID uuid : players) {
             playerStates.put(uuid, new PlayerTumbleState());
             ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
-            if (player != null) setupPlayer(player);
+            if (player != null) {
+                player.teleportTo(level, spawnVec.x, spawnVec.y, spawnVec.z, player.getYRot(), player.getXRot());
+                setupPlayer(player);
+            }
         }
-        buildArena();
+
+        // Only build procedural arena if no template was loaded
+        if (worldHandle == null) {
+            buildArena();
+        }
     }
 
     private void setupPlayer(ServerPlayer player) {
@@ -89,6 +127,11 @@ public class TumbleMinigameController extends AbstractMinigameController<TumbleM
         for (UUID uuid : players) {
             ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
             if (player != null) player.setGameMode(GameType.SURVIVAL);
+        }
+        if (worldHandle != null) {
+            worldHandle.delete();
+            worldHandle = null;
+            Legacy4J.LOGGER.info("[Legacy4J Tumble] Deleted Tumble template world.");
         }
     }
 
@@ -134,7 +177,9 @@ public class TumbleMinigameController extends AbstractMinigameController<TumbleM
         phase = TumblePhase.PLAYING;
         phaseTimer = 0;
         playerStates.values().forEach(s -> s.eliminated = false);
-        buildArena();
+        if (worldHandle == null) {
+            buildArena();
+        }
         int i = 0;
         for (UUID uuid : players) {
             ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
@@ -229,3 +274,4 @@ public class TumbleMinigameController extends AbstractMinigameController<TumbleM
         boolean eliminated = false;
     }
 }
+

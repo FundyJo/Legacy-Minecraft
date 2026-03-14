@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Glide map: Supernova Laboratory -->
+<MinigameMap>
+    <TemplatePack path="glide/supernova_laboratory"/>
+    <SpawnPos x="0" y="100" z="0"/>
+    <LevelRules pvp="false" naturalRegeneration="false" keepInventory="false" timeOfDay="6000" weather="false"/>
+    <Checkpoint index="0" x="0" y="95" z="65" radius="6"/>
+    <Checkpoint index="1" x="45" y="88" z="95" radius="6"/>
+    <Checkpoint index="2" x="85" y="80" z="75" radius="6"/>
+    <Checkpoint index="3" x="105" y="72" z="35" radius="6"/>
+    <Checkpoint index="4" x="65" y="65" z="0" radius="6"/>
+</MinigameMap>

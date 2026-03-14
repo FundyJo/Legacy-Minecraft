@@ -4,8 +4,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 import wily.legacy.Legacy4J;
+import wily.legacy.fantasy.MinigameMapTemplateLoader;
+import wily.legacy.fantasy.RuntimeWorldHandle;
 import wily.legacy.minigame.Minigame;
+import wily.legacy.minigame.grf.GrfMap;
 import wily.legacy.minigame.networking.S2CCountdownPayload;
 import wily.legacy.minigame.networking.S2CMapVoteOptionsPayload;
 import wily.legacy.minigame.networking.S2CVoteUpdatePayload;
@@ -14,7 +18,8 @@ import java.util.*;
 
 /**
  * Lobby controller: manages player gathering, map voting, and game dispatch.
- * Players gather, vote on a map, then the winning minigame/map is launched.
+ * Players gather in a lobby world (loaded from a .mcsave template if available),
+ * vote on a map, then the winning minigame/map is launched.
  */
 public class LobbyMinigameController extends AbstractMinigameController<LobbyMinigameController> {
 
@@ -22,11 +27,15 @@ public class LobbyMinigameController extends AbstractMinigameController<LobbyMin
     private static final int COUNTDOWN_TICKS = 20 * 10;
     private static final int VOTE_TICKS = 20 * 20;
 
+    private static final ResourceLocation DEFAULT_LOBBY_MAP =
+            Legacy4J.createModLocation("lobby/default");
+
     private final Map<UUID, ResourceLocation> votes = new HashMap<>();
     private ResourceLocation[] voteOptions = new ResourceLocation[0];
     private String[] voteOptionNames = new String[0];
     private LobbyPhase phase = LobbyPhase.WAITING;
     private int phaseTimer = 0;
+    private RuntimeWorldHandle lobbyWorldHandle = null;
 
     public enum LobbyPhase { WAITING, VOTING, COUNTDOWN, DISPATCHING }
 
@@ -39,6 +48,34 @@ public class LobbyMinigameController extends AbstractMinigameController<LobbyMin
         phase = LobbyPhase.WAITING;
         phaseTimer = 0;
         votes.clear();
+
+        // Load lobby template world
+        ResourceLocation lobbyMapId = data.mapId().equals(ResourceLocation.withDefaultNamespace("empty"))
+                ? DEFAULT_LOBBY_MAP : data.mapId();
+        GrfMap grfMap = GrfMap.load(lobbyMapId);
+        ResourceLocation templateId = grfMap != null ? grfMap.getTemplatePackId() : lobbyMapId;
+
+        if (MinigameMapTemplateLoader.hasTemplate(level.getServer(), templateId)) {
+            RuntimeWorldHandle handle = MinigameMapTemplateLoader.loadTemplateHandle(level.getServer(), templateId);
+            if (handle != null) {
+                lobbyWorldHandle = handle;
+                this.level = handle.asWorld();
+                Legacy4J.LOGGER.info("[Legacy4J Lobby] Loaded lobby template world '{}'", templateId);
+            }
+        }
+
+        // Teleport all players to the lobby spawn
+        Vec3 spawnVec = (grfMap != null && grfMap.getSpawnPos() != null)
+                ? grfMap.getSpawnPos()
+                : new Vec3(level.getSharedSpawnPos().getX(), level.getSharedSpawnPos().getY() + 1,
+                           level.getSharedSpawnPos().getZ());
+        for (UUID uuid : players) {
+            ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
+            if (player != null) {
+                player.teleportTo(level, spawnVec.x, spawnVec.y, spawnVec.z, player.getYRot(), player.getXRot());
+            }
+        }
+
         if (data.availableMaps() != null && !data.availableMaps().isEmpty()) {
             voteOptions = data.availableMaps().toArray(new ResourceLocation[0]);
             voteOptionNames = new String[voteOptions.length];
@@ -51,6 +88,11 @@ public class LobbyMinigameController extends AbstractMinigameController<LobbyMin
     @Override
     protected void onEnd() {
         votes.clear();
+        if (lobbyWorldHandle != null) {
+            lobbyWorldHandle.delete();
+            lobbyWorldHandle = null;
+            Legacy4J.LOGGER.info("[Legacy4J Lobby] Deleted lobby template world.");
+        }
     }
 
     @Override
@@ -153,3 +195,4 @@ public class LobbyMinigameController extends AbstractMinigameController<LobbyMin
     public LobbyPhase getPhase() { return phase; }
     public Map<UUID, ResourceLocation> getVotes() { return Collections.unmodifiableMap(votes); }
 }
+

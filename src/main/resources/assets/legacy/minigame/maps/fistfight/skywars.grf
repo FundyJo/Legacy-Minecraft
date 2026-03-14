@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Fistfight map: Skywars-style arena -->
+<MinigameMap>
+    <TemplatePack path="fistfight/skywars"/>
+    <SpawnPos x="0" y="65" z="0"/>
+    <LevelRules pvp="true" naturalRegeneration="false" keepInventory="false" timeOfDay="6000" weather="false"/>
+    <!-- SPAWN flags define player spawn points -->
+    <FistfightFlag id="0" type="spawn" x="-10" y="65" z="0"/>
+    <FistfightFlag id="1" type="spawn" x="10" y="65" z="0"/>
+    <FistfightFlag id="2" type="spawn" x="0" y="65" z="-10"/>
+    <FistfightFlag id="3" type="spawn" x="0" y="65" z="10"/>
+    <FistfightFlag id="4" type="spawn" x="-7" y="65" z="-7"/>
+    <FistfightFlag id="5" type="spawn" x="7" y="65" z="-7"/>
+    <FistfightFlag id="6" type="spawn" x="-7" y="65" z="7"/>
+    <FistfightFlag id="7" type="spawn" x="7" y="65" z="7"/>
+</MinigameMap>

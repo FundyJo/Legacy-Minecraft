@@ -104,6 +104,12 @@ public abstract class AbstractMinigameController<T extends AbstractMinigameContr
         }
     }
 
+    /** Broadcasts a payload to ALL players currently on the server (e.g. for map transition announcements). */
+    protected void broadcastToAllPlayers(wily.factoryapi.base.network.CommonNetwork.Payload payload) {
+        wily.factoryapi.base.network.CommonNetwork.sendToPlayers(
+                level.getServer().getPlayerList().getPlayers(), payload);
+    }
+
     protected void broadcastTitle(Component title, Component subtitle) {
         for (UUID uuid : players) {
             ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
