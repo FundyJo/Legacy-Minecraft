@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Lobby map: Default -->
+<!-- The main lobby where players gather before minigames -->
+<LobbyMap>
+    <LevelRules pvp="false" naturalRegeneration="true" keepInventory="true"/>
+    <ForcedBiome id="minecraft:plains"/>
+</LobbyMap>

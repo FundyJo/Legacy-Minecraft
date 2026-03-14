@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Fistfight map: Basic Arena -->
+<!-- A simple PvP arena for fistfight -->
+<FistfightMap>
+    <LevelRules pvp="true" naturalRegeneration="false" keepInventory="false" friendlyFire="true"/>
+    <FistfightFlag id="0" x="0" y="65" z="0" type="spawn"/>
+    <FistfightFlag id="1" x="10" y="65" z="0" type="spawn"/>
+    <FistfightFlag id="2" x="-10" y="65" z="0" type="spawn"/>
+    <FistfightFlag id="3" x="0" y="65" z="10" type="spawn"/>
+    <FistfightFlag id="4" x="0" y="65" z="-10" type="spawn"/>
+    <FistfightFlag id="5" x="0" y="55" z="0" type="death_zone"/>
+    <ForcedBiome id="minecraft:plains"/>
+</FistfightMap>

@@ -106,6 +106,7 @@ import wily.legacy.entity.LegacyPlayerInfo;
 import wily.legacy.network.TopMessage;
 import wily.legacy.util.client.LegacyGuiElements;
 import wily.legacy.util.client.MCAccount;
+import wily.legacy.minigame.init.LegacyMinigameClientInit;
 
 
 import java.io.File;
@@ -364,6 +365,7 @@ public class Legacy4JClient {
     }
 
     public static void init() {
+        LegacyMinigameClientInit.init();
         ControlType.UpdateEvent.EVENT.register((last, actual) -> {
             UIAccessor uiAccessor = Minecraft.getInstance().screen == null ? FactoryScreenUtil.getGuiAccessor() : FactoryScreenUtil.getScreenAccessor();
             uiAccessor.reloadUI();

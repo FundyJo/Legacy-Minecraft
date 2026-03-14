@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Glide map: Skylines -->
+<!-- A high-altitude glide course through city skylines -->
+<GlideMap>
+    <LevelRules pvp="false" naturalRegeneration="false" keepInventory="true" timeOfDay="6000" weather="false"/>
+    <Checkpoint index="0" x="0" y="80" z="0" radius="5"/>
+    <Checkpoint index="1" x="50" y="75" z="50" radius="5"/>
+    <Checkpoint index="2" x="100" y="70" z="0" radius="5"/>
+    <Checkpoint index="3" x="50" y="65" z="-50" radius="5"/>
+    <Checkpoint index="4" x="0" y="60" z="0" radius="5"/>
+    <ForcedBiome id="minecraft:windswept_hills"/>
+</GlideMap>
