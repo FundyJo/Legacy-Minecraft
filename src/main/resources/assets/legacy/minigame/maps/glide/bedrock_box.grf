@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Glide map: Bedrock Box -->
+<!-- Template pack: legacy:glide/bedrock_box (.mcsave) provides the actual world terrain -->
+<MinigameMap>
+    <TemplatePack path="glide/bedrock_box"/>
+    <SpawnPos x="0" y="70" z="0"/>
+    <LevelRules pvp="false" naturalRegeneration="false" keepInventory="false" timeOfDay="6000" weather="false"/>
+    <!-- Checkpoints define the glide course. Update these positions to match the actual map. -->
+    <Checkpoint index="0" x="0" y="65" z="50" radius="5"/>
+    <Checkpoint index="1" x="30" y="60" z="80" radius="5"/>
+    <Checkpoint index="2" x="60" y="55" z="60" radius="5"/>
+    <Checkpoint index="3" x="80" y="50" z="30" radius="5"/>
+    <Checkpoint index="4" x="50" y="45" z="0" radius="5"/>
+</MinigameMap>

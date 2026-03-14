@@ -2,7 +2,7 @@ package wily.legacy.minigame.grf;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.phys.Vec3;
 import wily.legacy.Legacy4J;
 import wily.legacy.minigame.grf.element.*;
 
@@ -13,6 +13,9 @@ import java.util.*;
 /**
  * GRF (Game Rules Format) map loader and parser.
  * Parses XML-based map definition files for minigames.
+ *
+ * The GRF file provides game-logic metadata (checkpoints, spawn positions, rules)
+ * while the actual world terrain is loaded from a .mcsave template pack.
  */
 public class GrfMap {
 
@@ -23,14 +26,23 @@ public class GrfMap {
     private final List<Checkpoint> checkpoints;
     private final List<FistfightFlag> fistfightFlags;
     private final ForcedBiome forcedBiome;
+    private final List<UpdatePlayer> updatePlayers;
+    /** Path of the .mcsave template pack relative to the map root (without extension). */
+    private final String templatePackPath;
+    /** Default spawn position for this map (from the GRF <SpawnPos> element). */
+    private final Vec3 spawnPos;
 
     public GrfMap(ResourceLocation id, LevelRules levelRules, List<Checkpoint> checkpoints,
-                  List<FistfightFlag> fistfightFlags, ForcedBiome forcedBiome) {
+                  List<FistfightFlag> fistfightFlags, ForcedBiome forcedBiome,
+                  List<UpdatePlayer> updatePlayers, String templatePackPath, Vec3 spawnPos) {
         this.id = id;
         this.levelRules = levelRules;
         this.checkpoints = Collections.unmodifiableList(checkpoints);
         this.fistfightFlags = Collections.unmodifiableList(fistfightFlags);
         this.forcedBiome = forcedBiome;
+        this.updatePlayers = Collections.unmodifiableList(updatePlayers);
+        this.templatePackPath = templatePackPath;
+        this.spawnPos = spawnPos;
     }
 
     public ResourceLocation getId() { return id; }
@@ -38,6 +50,27 @@ public class GrfMap {
     public List<Checkpoint> getCheckpoints() { return checkpoints; }
     public List<FistfightFlag> getFistfightFlags() { return fistfightFlags; }
     public ForcedBiome getForcedBiome() { return forcedBiome; }
+    public List<UpdatePlayer> getUpdatePlayers() { return updatePlayers; }
+
+    /**
+     * Returns the .mcsave template pack path for this map.
+     * The ResourceLocation for loading is built as: {@code <mapId.namespace>:<templatePackPath>}
+     * or, if templatePackPath is empty, defaults to the mapId path itself.
+     */
+    public String getTemplatePackPath() { return templatePackPath; }
+
+    /**
+     * Returns the ResourceLocation to use when looking up the .mcsave template.
+     */
+    public ResourceLocation getTemplatePackId() {
+        if (templatePackPath != null && !templatePackPath.isEmpty()) {
+            return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), templatePackPath);
+        }
+        return id;
+    }
+
+    /** Returns the default player spawn position for this map (may be null). */
+    public Vec3 getSpawnPos() { return spawnPos; }
 
     /**
      * Load checkpoints for a given map from GRF data.
@@ -87,7 +120,10 @@ public class GrfMap {
         LevelRules levelRules = new LevelRules();
         List<Checkpoint> checkpoints = new ArrayList<>();
         List<FistfightFlag> fistfightFlags = new ArrayList<>();
+        List<UpdatePlayer> updatePlayers = new ArrayList<>();
         ForcedBiome forcedBiome = null;
+        String templatePackPath = "";
+        Vec3 spawnPos = null;
 
         var nodes = root.getChildNodes();
         for (int i = 0; i < nodes.getLength(); i++) {
@@ -99,9 +135,24 @@ public class GrfMap {
                 case "Checkpoint" -> checkpoints.add(Checkpoint.parse(element));
                 case "FistfightFlag" -> fistfightFlags.add(FistfightFlag.parse(element));
                 case "ForcedBiome" -> forcedBiome = ForcedBiome.parse(element);
+                case "UpdatePlayer" -> updatePlayers.add(UpdatePlayer.parse(element));
+                case "TemplatePack" -> templatePackPath = element.getAttribute("path");
+                case "SpawnPos" -> spawnPos = parseVec3(element);
             }
         }
-        return new GrfMap(id, levelRules, checkpoints, fistfightFlags, forcedBiome);
+        return new GrfMap(id, levelRules, checkpoints, fistfightFlags, forcedBiome,
+                updatePlayers, templatePackPath, spawnPos);
+    }
+
+    private static Vec3 parseVec3(org.w3c.dom.Element element) {
+        try {
+            double x = Double.parseDouble(element.getAttribute("x"));
+            double y = Double.parseDouble(element.getAttribute("y"));
+            double z = Double.parseDouble(element.getAttribute("z"));
+            return new Vec3(x, y, z);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     /**

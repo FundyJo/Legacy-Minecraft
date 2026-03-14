@@ -2,6 +2,7 @@ package wily.legacy.minigame.controller;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -11,12 +12,13 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import wily.legacy.Legacy4J;
+import wily.legacy.fantasy.MinigameMapTemplateLoader;
+import wily.legacy.fantasy.RuntimeWorldHandle;
 import wily.legacy.minigame.Minigame;
+import wily.legacy.minigame.grf.GrfMap;
 import wily.legacy.minigame.networking.S2CGlideCheckpointPayload;
 import wily.legacy.minigame.networking.S2CLeaderboardPayload;
-import wily.legacy.fantasy.Fantasy;
-import wily.legacy.fantasy.RuntimeWorldConfig;
-import wily.legacy.fantasy.RuntimeWorldHandle;
+import wily.legacy.minigame.networking.S2CMapTransitionPayload;
 
 import java.util.*;
 
@@ -24,8 +26,8 @@ import java.util.*;
  * Glide minigame controller: Elytra racing through checkpoints.
  * Players fly through checkpoints to complete a course as fast as possible.
  *
- * Uses the custom Fantasy API to create a temporary runtime world
- * for the Glide map, which is deleted when the game ends.
+ * Loads the race track from a .mcsave template pack via the Fantasy API,
+ * creating a temporary dimension that is deleted when the game ends.
  */
 public class GlideMinigameController extends AbstractMinigameController<GlideMinigameController> {
 
@@ -34,14 +36,14 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
 
     private final Map<UUID, PlayerGlideState> playerStates = new HashMap<>();
     private List<BlockPos> checkpoints = new ArrayList<>();
-    private GlidePhase phase = GlidePhase.WAITING;
+    private GlidePhase phase = GlidePhase.LOADING;
     private int phaseTimer = 0;
     private int finishedCount = 0;
 
-    // Fantasy API world handle for temporary dimension management
+    /** Handle to the template-loaded Fantasy world, used to delete it on game end. */
     private RuntimeWorldHandle worldHandle = null;
 
-    public enum GlidePhase { WAITING, COUNTDOWN, RACING, FINISHED }
+    public enum GlidePhase { LOADING, COUNTDOWN, RACING, FINISHED }
 
     public GlideMinigameController(ServerLevel level) {
         super(level);
@@ -49,31 +51,62 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
 
     @Override
     protected void onStart() {
-        phase = GlidePhase.COUNTDOWN;
+        phase = GlidePhase.LOADING;
         phaseTimer = 0;
         finishedCount = 0;
         playerStates.clear();
-        checkpoints = GrfMap.loadCheckpoints(data.mapId());
 
+        ResourceLocation mapId = data.mapId();
+        GrfMap grfMap = GrfMap.load(mapId);
+
+        // Determine the template pack to load (GRF can override the default)
+        ResourceLocation templateId = grfMap != null ? grfMap.getTemplatePackId() : mapId;
+
+        // Notify clients about the incoming map transition
+        broadcastToAllPlayers(new S2CMapTransitionPayload(mapId, Minigame.GLIDE.getName(), 60));
+
+        // Load the .mcsave template world; once loaded, initialize the game
+        boolean hasTemplate = MinigameMapTemplateLoader.hasTemplate(level.getServer(), templateId);
+        if (hasTemplate) {
+            RuntimeWorldHandle handle = MinigameMapTemplateLoader.loadTemplateHandle(level.getServer(), templateId);
+            if (handle != null) {
+                worldHandle = handle;
+                this.level = handle.asWorld();
+                Legacy4J.LOGGER.info("[Legacy4J Glide] Loaded template world '{}' for map '{}'", templateId, mapId);
+            } else {
+                Legacy4J.LOGGER.warn("[Legacy4J Glide] Template load failed for '{}', using current level", templateId);
+            }
+        } else {
+            Legacy4J.LOGGER.info("[Legacy4J Glide] No template pack for '{}', using current level", templateId);
+        }
+
+        // Load checkpoints from GRF
+        if (grfMap != null) {
+            checkpoints = grfMap.getCheckpoints().stream()
+                    .map(c -> c.position())
+                    .toList();
+        } else {
+            checkpoints = GrfMap.loadCheckpoints(mapId);
+        }
+
+        // Resolve spawn position
+        Vec3 spawnVec = (grfMap != null && grfMap.getSpawnPos() != null)
+                ? grfMap.getSpawnPos()
+                : new Vec3(level.getSharedSpawnPos().getX(), level.getSharedSpawnPos().getY() + 1,
+                           level.getSharedSpawnPos().getZ());
+
+        // Set up players
         for (UUID uuid : players) {
             playerStates.put(uuid, new PlayerGlideState(checkpoints.size()));
             ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
             if (player != null) {
+                player.teleportTo(level, spawnVec.x, spawnVec.y, spawnVec.z, player.getYRot(), player.getXRot());
                 setupPlayer(player);
             }
         }
 
-        try {
-            Fantasy fantasy = Fantasy.get(level.getServer());
-            RuntimeWorldConfig config = new RuntimeWorldConfig()
-                    .setDimensionType(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION_TYPE, Legacy4J.createModLocation("glide")))
-                    .setGenerator(level.getServer().getWorldData().worldGenOptions().dimensions().getDimension(net.minecraft.world.level.dimension.BuiltinDimensionTypes.OVERWORLD).generator())
-                    .setShouldTickTime(false);
-            worldHandle = fantasy.openTemporaryWorld(config);
-            Legacy4J.LOGGER.info("[Legacy4J Glide] Opened temporary world for Glide map {}", data.mapId());
-        } catch (Exception e) {
-            Legacy4J.LOGGER.warn("[Legacy4J Glide] Could not create Fantasy world: {}", e.getMessage());
-        }
+        phase = GlidePhase.COUNTDOWN;
+        phaseTimer = 0;
     }
 
     private void setupPlayer(ServerPlayer player) {
@@ -85,11 +118,11 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
     @Override
     protected void onEnd() {
         playerStates.clear();
-        checkpoints.clear();
+        checkpoints = new ArrayList<>();
         if (worldHandle != null) {
             worldHandle.delete();
             worldHandle = null;
-            Legacy4J.LOGGER.info("[Legacy4J Glide] Deleted temporary Glide world.");
+            Legacy4J.LOGGER.info("[Legacy4J Glide] Deleted Glide template world.");
         }
     }
 
@@ -97,6 +130,14 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
     protected void onTick() {
         phaseTimer++;
         switch (phase) {
+            case LOADING -> {
+                // Loading is now synchronous, so this phase is only briefly entered
+                if (phaseTimer > 40) {
+                    Legacy4J.LOGGER.warn("[Legacy4J Glide] Still in LOADING phase after 2s, forcing COUNTDOWN.");
+                    phase = GlidePhase.COUNTDOWN;
+                    phaseTimer = 0;
+                }
+            }
             case COUNTDOWN -> {
                 int remaining = GAME_START_COUNTDOWN - phaseTimer;
                 if (remaining <= 0) {
@@ -104,6 +145,9 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
                     phaseTimer = 0;
                     broadcastTitle(Component.translatable("legacy.minigame.glide.go"),
                             Component.translatable("legacy.minigame.glide.fly_through"));
+                    // Start player timers now
+                    long now = System.currentTimeMillis();
+                    playerStates.values().forEach(s -> s.startTimeMs = now);
                 } else if (remaining % 20 == 0) {
                     broadcastTitle(Component.literal(String.valueOf(remaining / 20)),
                             Component.translatable("legacy.minigame.glide.ready"));
@@ -119,6 +163,7 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
                     broadcastLeaderboard();
                 }
             }
+            case FINISHED -> {}
         }
     }
 
@@ -140,7 +185,8 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
                 state.nextCheckpoint++;
                 state.lastCheckpointTimeMs = System.currentTimeMillis();
                 wily.factoryapi.base.network.CommonNetwork.sendToPlayer(player,
-                        new S2CGlideCheckpointPayload(state.nextCheckpoint, checkpoints.size(), state.lastCheckpointTimeMs - state.startTimeMs));
+                        new S2CGlideCheckpointPayload(state.nextCheckpoint, checkpoints.size(),
+                                state.lastCheckpointTimeMs - state.startTimeMs));
 
                 if (state.nextCheckpoint >= checkpoints.size()) {
                     finishPlayer(player, state);
@@ -156,9 +202,11 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
         long elapsed = state.finishTimeMs - state.startTimeMs;
         broadcastTitle(Component.translatable("legacy.minigame.glide.finished", finishedCount),
                 Component.translatable("legacy.minigame.glide.time", elapsed / 1000.0));
-        MinigamesController.addStats(player.getUUID(), Minigame.GLIDE, (int)(MAX_GAME_TICKS - (state.finishTimeMs - state.startTimeMs) / 50));
+        MinigamesController.addStats(player.getUUID(), Minigame.GLIDE,
+                (int)(MAX_GAME_TICKS - (state.finishTimeMs - state.startTimeMs) / 50));
 
         if (finishedCount >= players.size()) {
+            phase = GlidePhase.FINISHED;
             end();
         }
     }
@@ -198,3 +246,4 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
         }
     }
 }
+

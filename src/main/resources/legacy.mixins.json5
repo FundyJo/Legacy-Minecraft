@@ -247,7 +247,8 @@
     "BaseContainerBlockEntityMixin",
     "PrepareSpawnTaskMixin",
     "PigAccessor",
-    "ItemBasedSteeringAccessor"
+    "ItemBasedSteeringAccessor",
+    "fantasy.MinecraftServerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

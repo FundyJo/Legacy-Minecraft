@@ -2,6 +2,8 @@
 <!-- Tumble map: Basic Arena -->
 <!-- A multi-floor tumble arena -->
 <TumbleMap>
+    <TemplatePack path="tumble/basic_arena"/>
+    <SpawnPos x="0" y="89" z="0"/>
     <LevelRules pvp="true" naturalRegeneration="false" keepInventory="false"/>
     <ForcedBiome id="minecraft:snowy_plains"/>
 </TumbleMap>

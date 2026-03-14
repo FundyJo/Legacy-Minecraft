@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Glide map: Crimson Fortress -->
+<MinigameMap>
+    <TemplatePack path="glide/crimson_fortress"/>
+    <SpawnPos x="0" y="90" z="0"/>
+    <LevelRules pvp="false" naturalRegeneration="false" keepInventory="false" timeOfDay="18000" weather="false"/>
+    <Checkpoint index="0" x="0" y="85" z="60" radius="6"/>
+    <Checkpoint index="1" x="40" y="78" z="100" radius="6"/>
+    <Checkpoint index="2" x="80" y="70" z="80" radius="6"/>
+    <Checkpoint index="3" x="100" y="62" z="40" radius="6"/>
+    <Checkpoint index="4" x="60" y="55" z="0" radius="6"/>
+</MinigameMap>

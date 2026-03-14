@@ -2,6 +2,8 @@
 <!-- Glide map: Skylines -->
 <!-- A high-altitude glide course through city skylines -->
 <GlideMap>
+    <TemplatePack path="glide/skylines"/>
+    <SpawnPos x="0" y="82" z="0"/>
     <LevelRules pvp="false" naturalRegeneration="false" keepInventory="true" timeOfDay="6000" weather="false"/>
     <Checkpoint index="0" x="0" y="80" z="0" radius="5"/>
     <Checkpoint index="1" x="50" y="75" z="50" radius="5"/>
