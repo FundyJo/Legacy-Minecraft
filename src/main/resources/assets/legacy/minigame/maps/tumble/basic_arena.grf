@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Tumble map: Basic Arena -->
+<!-- A multi-floor tumble arena -->
+<TumbleMap>
+    <LevelRules pvp="true" naturalRegeneration="false" keepInventory="false"/>
+    <ForcedBiome id="minecraft:snowy_plains"/>
+</TumbleMap>

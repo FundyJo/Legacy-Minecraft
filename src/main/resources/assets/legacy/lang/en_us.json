@@ -1870,5 +1870,44 @@
   "structure.minecraft.villages": "Villages",
   "structure.minecraft.villages.description": "Settlements situated in Plains, Savanna, Desert, Taiga or Snowy Plains biomes. Guarded by Iron Golems and home to Farmers, Librarians, Clerics, Blacksmiths and Butchers.",
   "structure.minecraft.woodland_mansions": "Woodland Mansions",
-  "structure.minecraft.woodland_mansions.description": "Masions found in Dark Oak Forests. Home to Vexes and Illagers."
+  "structure.minecraft.woodland_mansions.description": "Masions found in Dark Oak Forests. Home to Vexes and Illagers.",
+
+  "legacy.minigame.none": "None",
+  "legacy.minigame.lobby": "Lobby",
+  "legacy.minigame.glide": "Glide",
+  "legacy.minigame.fistfight": "Fistfight",
+  "legacy.minigame.tumble": "Tumble",
+
+  "legacy.menu.minigame.select": "Choose Minigame",
+  "legacy.menu.minigame.select_map": "Choose Map",
+  "legacy.menu.minigame.play": "Play",
+  "legacy.menu.minigame.random_map": "Random Map",
+  "legacy.menu.minigame.lobby": "Lobby",
+  "legacy.menu.minigame.vote_for_map": "Vote for a Map",
+  "legacy.menu.minigame.your_vote": "Your vote: %s",
+
+  "legacy.minigame.lobby.waiting": "Waiting for players...",
+  "legacy.minigame.lobby.players_needed": "Need %s more player(s)",
+  "legacy.minigame.lobby.starting": "Get ready!",
+
+  "legacy.minigame.glide.go": "GO!",
+  "legacy.minigame.glide.fly_through": "Fly through all checkpoints!",
+  "legacy.minigame.glide.ready": "Get ready to glide!",
+  "legacy.minigame.glide.checkpoint": "Checkpoint %s/%s",
+  "legacy.minigame.glide.finished": "Finished! Place #%s",
+  "legacy.minigame.glide.time": "Time: %.3f s",
+
+  "legacy.minigame.fistfight.ready": "Get ready to fight!",
+  "legacy.minigame.fistfight.fight": "Fight!",
+  "legacy.minigame.fistfight.round": "Round %s",
+  "legacy.minigame.fistfight.round_winner": "%s wins the round!",
+  "legacy.minigame.fistfight.kills": "Kills",
+
+  "legacy.minigame.tumble.ready": "Get ready to tumble!",
+  "legacy.minigame.tumble.survive": "Last player standing wins!",
+  "legacy.minigame.tumble.round": "Round %s",
+  "legacy.minigame.tumble.round_winner": "%s wins the round!",
+  "legacy.minigame.tumble.layer_removed": "Floor removed!",
+  "legacy.minigame.tumble.watch_out": "Watch out!",
+  "legacy.minigame.tumble.eliminated": "You have been eliminated!"
 }
