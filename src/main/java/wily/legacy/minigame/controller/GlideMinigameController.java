@@ -14,7 +14,9 @@ import wily.legacy.Legacy4J;
 import wily.legacy.minigame.Minigame;
 import wily.legacy.minigame.networking.S2CGlideCheckpointPayload;
 import wily.legacy.minigame.networking.S2CLeaderboardPayload;
-import wily.legacy.minigame.grf.GrfMap;
+import wily.legacy.fantasy.Fantasy;
+import wily.legacy.fantasy.RuntimeWorldConfig;
+import wily.legacy.fantasy.RuntimeWorldHandle;
 
 import java.util.*;
 
@@ -22,7 +24,7 @@ import java.util.*;
  * Glide minigame controller: Elytra racing through checkpoints.
  * Players fly through checkpoints to complete a course as fast as possible.
  *
- * Fantasy API integration (Fabric-only) is used to create a temporary runtime world
+ * Uses the custom Fantasy API to create a temporary runtime world
  * for the Glide map, which is deleted when the game ends.
  */
 public class GlideMinigameController extends AbstractMinigameController<GlideMinigameController> {
@@ -36,11 +38,8 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
     private int phaseTimer = 0;
     private int finishedCount = 0;
 
-    // Fantasy API world handle - stored as Object to avoid class loading issues when Fantasy is not installed.
-    // Enable by installing Fantasy (xyz.nucleoid:fantasy) and casting to RuntimeWorldHandle.
-    //? if fabric {
-    private Object worldHandle = null;
-    //?}
+    // Fantasy API world handle for temporary dimension management
+    private RuntimeWorldHandle worldHandle = null;
 
     public enum GlidePhase { WAITING, COUNTDOWN, RACING, FINISHED }
 
@@ -64,10 +63,9 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
             }
         }
 
-        //? if fabric {
-        /*try {
-            xyz.nucleoid.fantasy.Fantasy fantasy = xyz.nucleoid.fantasy.Fantasy.get(level.getServer());
-            xyz.nucleoid.fantasy.RuntimeWorldConfig config = new xyz.nucleoid.fantasy.RuntimeWorldConfig()
+        try {
+            Fantasy fantasy = Fantasy.get(level.getServer());
+            RuntimeWorldConfig config = new RuntimeWorldConfig()
                     .setDimensionType(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION_TYPE, Legacy4J.createModLocation("glide")))
                     .setGenerator(level.getServer().getWorldData().worldGenOptions().dimensions().getDimension(net.minecraft.world.level.dimension.BuiltinDimensionTypes.OVERWORLD).generator())
                     .setShouldTickTime(false);
@@ -75,8 +73,7 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
             Legacy4J.LOGGER.info("[Legacy4J Glide] Opened temporary world for Glide map {}", data.mapId());
         } catch (Exception e) {
             Legacy4J.LOGGER.warn("[Legacy4J Glide] Could not create Fantasy world: {}", e.getMessage());
-        }*/
-        //?}
+        }
     }
 
     private void setupPlayer(ServerPlayer player) {
@@ -89,13 +86,11 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
     protected void onEnd() {
         playerStates.clear();
         checkpoints.clear();
-        //? if fabric {
-        /*if (worldHandle != null) {
-            ((xyz.nucleoid.fantasy.RuntimeWorldHandle) worldHandle).delete();
+        if (worldHandle != null) {
+            worldHandle.delete();
             worldHandle = null;
             Legacy4J.LOGGER.info("[Legacy4J Glide] Deleted temporary Glide world.");
-        }*/
-        //?}
+        }
     }
 
     @Override
