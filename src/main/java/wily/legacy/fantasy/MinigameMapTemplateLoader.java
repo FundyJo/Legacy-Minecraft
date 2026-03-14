@@ -152,14 +152,17 @@ public final class MinigameMapTemplateLoader {
 
     /**
      * Checks whether a template pack exists for the given map.
+     * Does not open a stream; uses existence checks only.
      */
     public static boolean hasTemplate(MinecraftServer server, ResourceLocation mapId) {
-        InputStream stream = findTemplateStream(server, mapId);
-        if (stream != null) {
-            try { stream.close(); } catch (IOException ignored) {}
+        // Check classpath resource
+        String classPath = CLASSPATH_PREFIX + mapId.getPath() + ".mcsave";
+        if (MinigameMapTemplateLoader.class.getResource(classPath) != null) {
             return true;
         }
-        return false;
+        // Check server directory
+        Path serverPath = server.getServerDirectory().resolve(SERVER_DIR_PREFIX + mapId.getPath() + ".mcsave");
+        return Files.exists(serverPath);
     }
 
     private static InputStream findTemplateStream(MinecraftServer server, ResourceLocation mapId) {

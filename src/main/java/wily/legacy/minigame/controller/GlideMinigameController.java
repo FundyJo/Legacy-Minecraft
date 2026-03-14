@@ -145,9 +145,12 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
                     phaseTimer = 0;
                     broadcastTitle(Component.translatable("legacy.minigame.glide.go"),
                             Component.translatable("legacy.minigame.glide.fly_through"));
-                    // Start player timers now
+                    // Set race start time for all players now
                     long now = System.currentTimeMillis();
-                    playerStates.values().forEach(s -> s.startTimeMs = now);
+                    playerStates.values().forEach(s -> {
+                        s.startTimeMs = now;
+                        s.lastCheckpointTimeMs = now;
+                    });
                 } else if (remaining % 20 == 0) {
                     broadcastTitle(Component.literal(String.valueOf(remaining / 20)),
                             Component.translatable("legacy.minigame.glide.ready"));
@@ -236,8 +239,8 @@ public class GlideMinigameController extends AbstractMinigameController<GlideMin
     private static class PlayerGlideState {
         int nextCheckpoint = 0;
         int totalCheckpoints;
-        long startTimeMs = System.currentTimeMillis();
-        long lastCheckpointTimeMs = System.currentTimeMillis();
+        long startTimeMs = 0;
+        long lastCheckpointTimeMs = 0;
         long finishTimeMs = 0;
         boolean finished = false;
 

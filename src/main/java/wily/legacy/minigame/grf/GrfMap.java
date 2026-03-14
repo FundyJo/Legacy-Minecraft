@@ -68,7 +68,6 @@ public class GrfMap {
         }
         return id;
     }
-
     /** Returns the default player spawn position for this map (may be null). */
     public Vec3 getSpawnPos() { return spawnPos; }
 
@@ -122,7 +121,7 @@ public class GrfMap {
         List<FistfightFlag> fistfightFlags = new ArrayList<>();
         List<UpdatePlayer> updatePlayers = new ArrayList<>();
         ForcedBiome forcedBiome = null;
-        String templatePackPath = "";
+        String templatePackPath = null;
         Vec3 spawnPos = null;
 
         var nodes = root.getChildNodes();
