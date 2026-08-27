@@ -6,6 +6,13 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 
+/**
+ * Confirmed values: {@code BAT} and {@code INVISIBLE} are verified known constants
+ * per issue specification. The complete set may be larger — the Battle minigame is
+ * absent from {@code Minimega-Project/minimega-decomp}.
+ *
+ * <p>Do not add further constants without confirmed Minimega source.
+ */
 public enum SpectatorMode implements StringRepresentable {
     BAT("bat"),
     INVISIBLE("invisible");
