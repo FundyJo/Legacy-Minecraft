@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "minimega:block/diamond_ring_block"
+    }
+  }
+}

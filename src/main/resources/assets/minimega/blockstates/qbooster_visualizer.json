@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "minimega:block/qbooster_visualizer"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "minimega:block/absolute_speed_boost"
+    }
+  }
+}
