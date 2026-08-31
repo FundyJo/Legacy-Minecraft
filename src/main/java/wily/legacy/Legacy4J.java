@@ -24,6 +24,7 @@ import wily.legacy.config.LegacyCommonOptions;
 import wily.legacy.config.LegacyMixinToggles;
 import wily.legacy.config.LegacyWorldOptions;
 import wily.legacy.init.*;
+import wily.legacy.minigame.network.MinimegaNetwork;
 import wily.legacy.mobcaps.LegacyMobCaps;
 import wily.legacy.network.*;
 import wily.legacy.skins.SkinsBootstrap;
@@ -133,6 +134,7 @@ public class Legacy4J {
             r.register(true, SkinSync.UploadAssetChunkC2S.ID);
             r.register(false, SkinSync.SyncAssetChunkS2C.ID);
         });
+        MinimegaNetwork.register();
         SkinsBootstrap.initCommon();
         ArmorStandPose.init();
         LegacyMobCaps.init();
