@@ -1,89 +1,120 @@
 # MINIMEGA Migration
 
+## Source of Truth
+
+The only authoritative Minimega implementation used by this migration is:
+
+FundyJo/Minimega
+https://github.com/FundyJo/Minimega
+
+No other Minimega repository or decompiled reconstruction is used as a source of truth.
+
 ## Phase 2 status
 
-- BLOCKED – ORIGINAL RESOURCE RECOVERY
-- Source of truth: upstream Minimega project and verified original artifacts.
-- Current status: all generated placeholder resources were removed from the repository to avoid checking in fake Minimega assets.
-- No verified `assets/minimega` or `data/minimega` tree is currently available from the available sources in this environment.
+- IN PROGRESS – FundyJo/Minimega resources imported, Stage-1/Stage-2 validation refreshed.
+- No secondary Minimega source-of-truth dependency remains in this migration document.
 
-## Placeholder resource cleanup
+## Stage 1 re-validation against FundyJo/Minimega
 
-The following synthetic placeholder content was removed because it was not traceable to an original Minimega artifact and violates the Minimega source-of-truth requirement:
+Validated against repository snapshot:
+`FundyJo/Minimega@92d9e44fa48b25bea02984894e3b0ba60a467b7a`
 
-- `src/main/resources/assets/minimega/**`
-  - blockstates JSON
-  - item JSON
-  - model JSON
-  - lang JSON
-  - sound metadata JSON
-  - `.ogg` sound files
-  - PNG textures
-- `src/main/resources/data/minimega/**`
-  - game config JSON
-  - gamerules XML
-  - map JSON
-  - generated metadata placeholders with `status: placeholder`
+### confirmed from FundyJo/Minimega
 
-This includes the known placeholder file types explicitly called out by the issue: fake `.ogg`, fake textures, generated JSON/XML/NBT/GRF-style metadata, and fabricated Minimega registry IDs.
+- `wily.legacy.minigame.Minigame`
+  - IDs and names confirmed from `src/main/java/dev/jab125/minimega/mod/util/Minigame.java`
+  - `NONE=0`, `BATTLE=1`, `TUMBLE=2`, `GLIDE=3`, `FISTFIGHT=70`, `LOBBY=99`
+- `wily.legacy.minigame.data.*`
+  - `MapInfo`, `MapData`, `MapVariant`, `MapVariants`, `BattleVariants`, `NormalVariants` remain source-backed by `src/main/java/dev/jab125/minimega/mod/data/*`
+- `wily.legacy.minigame.config.BattleConfig`
+- `wily.legacy.minigame.config.GlideConfig`
+- `wily.legacy.minigame.config.MinigameConfigCodecs`
+- `wily.legacy.minigame.config.MinigameSpecificConfig`
+- `wily.legacy.minigame.config.NoConfig`
+- `wily.legacy.minigame.config.battle.BattleConfigSettings`
+- `wily.legacy.minigame.config.battle.PreconfiguredBattleConfigSettings`
+- `wily.legacy.minigame.config.battle.CasualBattleConfigSettings`
+- `wily.legacy.minigame.config.battle.CompetitiveBattleConfigSettings`
+- `wily.legacy.minigame.config.battle.Lives`
 
-## Source recovery findings
+### BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY
 
-### Attempted sources
-- `FundyJo/Minimega` — inaccessible from the environment; repository lookup failed and was not usable as a source.
-- `Minimega-Project/minimega-decomp` — inspected; no `assets/minimega` or `data/minimega` tree was present.
-- local git history / tags / branch content — no original Minimega jar or resource archive was located in the checked-out repository state.
-- known release artifacts and local recovered zip/jar files — none that could be verified as the canonical Minimega 6.5.32 / Minecraft 26.1.2 resource set.
+The following upstream files currently contain only `// INTERNAL ERROR //` in `FundyJo/Minimega`, so direct value/codec verification is blocked:
 
-### Result
-- No verified original resource tree was recovered in this environment.
-- Therefore no production-grade Minimega resource import is possible at this stage.
-- The repository now contains no fake Minimega assets, and the source recovery blocker is documented honestly.
+- `dev/jab125/minimega/mod/util/controller/glide/GlideGameType.java`
+- `dev/jab125/minimega/mod/util/minigamedata/battle/RoundLength.java`
+- `dev/jab125/minimega/mod/util/minigamedata/battle/MapSize.java`
+- `dev/jab125/minimega/mod/util/minigamedata/battle/ItemSet.java`
+- `dev/jab125/minimega/mod/util/minigamedata/battle/HungerSettings.java`
+- `dev/jab125/minimega/mod/util/minigamedata/battle/SpectatorMode.java`
 
-## Registry parity result
+Legacy-side classes remain present for compatibility, but are not marked DONE for full parity until those upstream files are recoverable within `FundyJo/Minimega`.
 
-`MinimegaRegistries` is intentionally not registering any block or sound IDs while source parity remains unresolved.
+## GlideGameType codec verification
 
-Mapping table (verified versus blocked):
+`wily.legacy.minigame.config.glide.GlideGameType` currently stays on integer-ordinal codecs (`Codec.INT.xmap(...)`, `STREAM_CODEC` ordinal mapping) as existing behavior.
 
-- Original Minimega `ModBlocks.*` -> Legacy4J port: `BLOCKED – SOURCE RECOVERY`
-- Original Minimega `ModSounds.*` -> Legacy4J port: `BLOCKED – SOURCE RECOVERY`
-- Original Minimega item registrations -> Legacy4J port: `BLOCKED – SOURCE RECOVERY`
-- Fake/generated IDs found in this branch -> removed
+Status: `NEEDS FUNDYJO/MINIMEGA VERIFICATION` because the upstream source file is currently unreadable (`// INTERNAL ERROR //`) and cannot be directly inspected for definitive codec structure.
 
-No registry IDs remain active unless they are recovered from the original Minimega upstream source and verified byte-for-byte against the real artifact.
+## Phase 2 resources (FundyJo/Minimega only)
 
-## Resource manager parity result
+Imported directly from `FundyJo/Minimega`:
 
-`MinimegaResourceManager` is kept inert and is not initialized during `Legacy4J.init()`.
+- `src/main/resources/assets/minimega/**` (333 files)
+- `src/main/resources/data/minimega/**` (85 files)
+- Root resources:
+  - `src/main/resources/chinese_mythologypack.png`
+  - `src/main/resources/fantasypack.png`
+  - `src/main/resources/festivepack.png`
+  - `src/main/resources/greek_mythologypack.png`
+  - `src/main/resources/plasticpack.png`
+  - `src/main/resources/ids.json`
+  - `src/main/resources/LICENSE_minimega`
+- Programmer-art namespace import:
+  - `src/main/resources/programmer_art/assets/minimega/**` (99 files)
 
-Rationale:
-- no verified original resource namespace was recovered,
-- no verified asset loader logic was identified,
-- keeping an empty loader abstraction would incorrectly imply source parity that does not exist.
+No placeholders, generated assets, or synthetic Minimega resources were introduced.
 
-`Legacy4J` startup therefore does not call the Minimega resource loader or registry registration while the source-recovery blocker remains open.
+## Resource reference validation
 
-## Migration status summary
+Validated copied resources against the same FundyJo/Minimega snapshot.
 
-### Verified/acceptable
-- the repository no longer contains artificial Minimega placeholder resources;
-- no fake block/sound registration IDs remain active;
-- no startup hook loads unverified Minimega resource code;
-- the migration file explicitly records the source-recovery blocker.
+### Inherent upstream-missing sound targets (also missing in FundyJo/Minimega)
 
-### Blocked
-- original Minimega 6.5.32 resource tree recovery;
-- original `ModBlocks` / `ModSounds` parity verification;
-- original `MinimegaResourceManager` runtime logic parity verification;
-- any real port of block/sound/item registrations that depend on upstream source assets.
+From `assets/minimega/sounds.json`:
 
-## Build blocker
+- `minimega:sounds/music/battle/dance_of_the_blocks.ogg`
+- `minimega:sounds/music/battle/master_builders.ogg`
+- `minimega:sounds/music/battle/toys_on_a_tear.ogg`
+- `minimega:sounds/music/battle/crafters_candy_canes.ogg`
+- `minimega:sounds/music/battle/giftwrapped.ogg`
+- `minimega:sounds/music/battle/wondrous_workshop.ogg`
 
-Attempted build command:
+### Inherent upstream-missing texture targets (also missing in FundyJo/Minimega)
+
+Model references without matching texture file in upstream snapshot:
+
+- `models/block/old_booster_visualizer.json` -> `textures/block/booster_visualizer_top.png`
+- `models/block/old_booster_visualizer.json` -> `textures/block/booster_visualizer.png`
+- `models/block/_qbooster_visualizer.json` -> `textures/block/qbooster_visualizer_top.png`
+- `models/block/_qbooster_visualizer.json` -> `textures/block/qbooster_visualizer.png`
+- `models/block/thermal_visualizer.json` -> `textures/block/thermal_animated.png`
+
+Status for those references: `BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY`.
+
+## Stage 2 registries/resources code validation
+
+- `wily.legacy.init.MinimegaRegistries` remains intentionally empty.
+  - Rationale: only fully ported, source-backed registrations should be enabled.
+  - No synthetic IDs are registered.
+- `wily.legacy.minigame.MinigameResourceManager` remains inert by design until a verified loader parity implementation is introduced.
+
+## Build (26.1.2-fabric)
+
+Attempted:
 
 ```bash
-JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64 ./gradlew compileJava --no-daemon
+JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64 ./gradlew :fabric:compileJava --no-daemon
 ```
 
 Observed exact failure:
@@ -92,10 +123,4 @@ Observed exact failure:
 Plugin [id: 'fabric-loom', version: '1.15-SNAPSHOT', apply: false] was not found ...
 ```
 
-Status: `BLOCKED – ENVIRONMENT / DEPENDENCY RESOLUTION`
-
-This is not a Minimega code bug. The build cannot reach project compilation in this environment because the repository's configured Fabric Loom snapshot dependency is unavailable.
-
-## Commit note
-
-The codebase now intentionally avoids placeholders and keeps the recovery blocker explicit rather than fabricating a Minimega resource tree that has no source provenance.
+Status: `BLOCKED – ENVIRONMENT / DEPENDENCY RESOLUTION`.

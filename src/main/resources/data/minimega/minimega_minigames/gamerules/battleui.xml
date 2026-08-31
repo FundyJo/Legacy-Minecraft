@@ -1,0 +1,138 @@
+<GameMode>
+    <!-- custom format -->
+    <HostOptions version="4">
+        <Options>
+            <TemplateDef id="onlineGame">
+                <!-- default: false -->
+                <Toggle id="onlineGame" default="false"/>
+            </TemplateDef>
+            <EnabledIf condition="onlineGame">
+                <TemplateDef id="publicGame" default="false">
+                    <!-- default: false -->
+                    <Toggle id="publicGame" default="false"/>
+                </TemplateDef>
+                <TemplateDef id="allowFriendsOfFriends">
+                    <!-- default: false -->
+                    <Toggle id="allowFriendsOfFriends" default="false"/>
+                </TemplateDef>
+                <TemplateDef id="inviteOnly">
+                    <!-- default: false -->
+                    <Toggle id="inviteOnly" default="false"/>
+                </TemplateDef>
+            </EnabledIf>
+            <TemplateDef id="battleGameType">
+                <!-- Casual|Competitive|Custom; default: Casual -->
+                <BasicSlider id="battleGameType" loctype="1" default="0">0 1 2</BasicSlider>
+            </TemplateDef>
+            <TemplateDef id="moreOptions">
+                <Button loc="moreOptions" action="moreOptions"/>
+            </TemplateDef>
+            <TemplateDef id="selectMaps">
+                <Button loc="selectMaps" action="selectMaps"/>
+            </TemplateDef>
+            <TemplateDef id="roundLength">
+                <!-- Short|Normal|Long; default: Normal -->
+                <BasicSlider id="roundLength" loctype="1" default="1">0 1 2</BasicSlider>
+            </TemplateDef>
+            <TemplateDef id="gameSize">
+                <!-- ()|(4|8)|(8|16); default: largest -->
+                <GameSizeSlider id="gameSize"/>
+            </TemplateDef>
+            <EnabledIf condition="false">
+                <TemplateDef id="centralSpawn">
+                    <!-- default: true -->
+                    <Toggle id="centralSpawn" default="true"/>
+                </TemplateDef>
+                <TemplateDef id="livesPerRound">
+                    <!-- Infinite|1|2|3|4|5|6|7|8|9|10; default: 1 -->
+                    <BasicSlider id="livesPerRound" loctype="2" default="1">0 1 2 3 4 5 6 7 8 9 10</BasicSlider>
+                </TemplateDef>
+                <TemplateDef id="hungerSettings">
+                    <!-- Normal|Anti Camper|Fast Healing|No Starving|Always Healing|No Hunger|Lead Feet|Always Hungry; default: Normal -->
+                    <BasicSlider id="hungerSettings" loctype="1" default="0">0 1 2 3 4 5 6 7</BasicSlider>
+                </TemplateDef>
+                <TemplateDef id="roundCount">
+                    <!-- 1|2|3|4|5|6|7|8|9|10; default: 1 -->
+                    <BasicSlider id="roundCount" default="1">1 2 3 4 5 6 7 8 9 10</BasicSlider>
+                </TemplateDef>
+            </EnabledIf>
+            <EnabledIf condition="battleGameType,2,eqn!">
+                <TemplateDef id="spectatorMode">
+                    <!-- Invisible|Allay|Bat|Bee|Parrot|Vex|Head; default: Bat -->
+                    <BasicSlider id="spectatorMode" loctype="1" default="2">0 1 2 3 4 5<!-- 6--></BasicSlider>
+                </TemplateDef>
+                <TemplateDef id="allowAllSkins">
+                    <!-- default: false -->
+                    <Toggle id="allowAllSkins" default="false"/>
+                </TemplateDef>
+                <TemplateDef id="itemSet">
+                    <!-- Normal|No Armor|High Power|Decayed|Food Central|Random; default: Normal -->
+                    <BasicSlider id="itemSet" loctype="1" default="0">0 1 2 3 4 5</BasicSlider>
+                </TemplateDef>
+                <TemplateDef id="mapSize">
+                    <!-- Auto|Small|Large|Large+; default: Auto --> <!-- TODO Large+ -->
+                    <BasicSlider id="mapSize" loctype="1" default="0">0 1 2</BasicSlider>
+                </TemplateDef>
+                <TemplateDef id="naturalRegeneration">
+                    <!-- default: true -->
+                    <Toggle id="naturalRegeneration" default="true"/>
+                </TemplateDef>
+                <TemplateDef id="smallInventory">
+                    <!-- default: true -->
+                    <Toggle id="smallInventory" default="true"/>
+                </TemplateDef>
+                <TemplateDef id="takeEverything" default="true">
+                    <!-- default: true -->
+                    <Toggle id="takeEverything" default="true"/>
+                </TemplateDef>
+                <TemplateDef id="chestRefill" default="true">
+                    <!-- default: true -->
+                    <Toggle id="chestRefill" default="true"/>
+                </TemplateDef>
+                <TemplateDef id="shortSneaking" default="true">
+                    <!-- default: true -->
+                    <Toggle id="shortSneaking" default="true"/>
+                </TemplateDef>
+            </EnabledIf>
+
+        </Options>
+        <FrontPage>
+            <UseTemplate id="onlineGame"/>
+            <UseTemplate id="publicGame"/>
+            <UseTemplate id="allowFriendsOfFriends"/>
+            <UseTemplate id="inviteOnly"/>
+            <UseTemplate id="selectMaps"/>
+            <UseTemplate id="battleGameType"/>
+            <UseTemplate id="moreOptions"/>
+        </FrontPage>
+        <BackPage>
+            <Section id="gameOptions">
+                <UseTemplate id="battleGameType"/>
+                <UseTemplate id="selectMaps"/>
+                <UseTemplate id="roundLength"/>
+                <UseTemplate id="gameSize"/>
+                <UseTemplate id="centralSpawn"/>
+            </Section>
+            <Section id="customOptions">
+                <UseTemplate id="livesPerRound"/>
+                <UseTemplate id="spectatorMode"/>
+                <UseTemplate id="allowAllSkins"/>
+                <UseTemplate id="itemSet"/>
+                <UseTemplate id="hungerSettings"/>
+                <UseTemplate id="roundCount"/>
+                <UseTemplate id="mapSize"/>
+                <UseTemplate id="naturalRegeneration"/>
+                <UseTemplate id="smallInventory"/>
+                <UseTemplate id="takeEverything"/>
+                <UseTemplate id="chestRefill"/>
+                <UseTemplate id="shortSneaking"/>
+            </Section>
+        </BackPage>
+    </HostOptions>
+    <Triggers>
+        <Trigger id="create" script="'create',battleGameType,concat!,trigger!,createBattleConfig!,gameSize,onlineGame,publicGame,createGame!"/>
+        <Trigger id="create0" script="'casual',roundLength,centralSpawn,createBuiltinBattleConfigSettings!,log!"/>
+        <Trigger id="create1" script="'competitive',roundLength,centralSpawn,createBuiltinBattleConfigSettings!,log!"/>
+        <Trigger id="create2" script="roundLength,centralSpawn,mapSize,livesPerRound,spectatorMode,allowAllSkins,itemSet,hungerSettings,roundCount,naturalRegeneration,smallInventory,takeEverything,chestRefill,shortSneaking,createCustomBattleConfigSettings!,log!"/>
+    </Triggers>
+</GameMode>

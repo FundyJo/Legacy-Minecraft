@@ -1,0 +1,14 @@
+<GameMode>
+    <HostOptions version="4">
+        <FrontPage>
+            <Toggle id="onlineGame"/>
+            <Toggle id="publicGame" disabledIfDisabled="onlineGame"/>
+            <Toggle id="allowFriendsOfFriends" disabledIfDisabled="onlineGame"/>
+            <Toggle id="inviteOnly" disabledIfDisabled="onlineGame"/>
+            <Toggle id="solo" disabledIfEnabled="onlineGame"/>
+            <Button loc="selectMaps" action="selectMaps"/>
+            <Slider id="gameType" loctype="1">0 1</Slider>
+            <GameSizeSlider id="gameSize" disabledIfEnabled="solo"/>
+        </FrontPage>
+    </HostOptions>
+</GameMode>

@@ -14,18 +14,12 @@ import java.util.Map;
 /**
  * Registry of known Minimega minigame types.
  *
- * <p><b>Source parity note:</b> {@code Minimega-Project/minimega-decomp} contains only
- * {@code NONE} (id=0), {@code GLIDE} (id=3), {@code FISTFIGHT} (id=70), and
- * {@code LOBBY} (id=99). {@code BATTLE} (id=1) and {@code TUMBLE} (id=2) are not present
- * in the available decompiled source; they are Legacy4J additions that anticipate future
- * Minimega support. Their integer IDs and serialized names are educated best-effort values
- * and must be re-verified when original Battle/Tumble source becomes available.
+ * <p>IDs/names are confirmed from {@code FundyJo/Minimega}
+ * ({@code dev/jab125/minimega/mod/util/Minigame.java}).
  */
 public final class Minigame implements Iterable<Minigame> {
     public static final Minigame NONE = new Minigame(0, "none", 0.0F, false);
-    /** Legacy4J addition — not present in Minimega-Project/minimega-decomp. ID/name unverified. */
     public static final Minigame BATTLE = new Minigame(1, "battle", 0.67F, true);
-    /** Legacy4J addition — not present in Minimega-Project/minimega-decomp. ID/name unverified. */
     public static final Minigame TUMBLE = new Minigame(2, "tumble", 0.32F, false);
     public static final Minigame GLIDE = new Minigame(3, "glide", 0.93F, true);
     public static final Minigame FISTFIGHT = new Minigame(70, "fistfight", 1.0F, true);

@@ -1,0 +1,1 @@
+{"rules":[{"for":"controlify:swap_hands","where":"left","forbid":["minimega:ready"],"then":"Ready"},{"for":"controlify:swap_hands","where":"left","then":"Not Ready","when":["minimega:ready"]},{"for":"controlify:drop","where":"left","then":"Vote"}],"override":false}
