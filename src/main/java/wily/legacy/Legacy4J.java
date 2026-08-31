@@ -24,6 +24,7 @@ import wily.legacy.config.LegacyCommonOptions;
 import wily.legacy.config.LegacyMixinToggles;
 import wily.legacy.config.LegacyWorldOptions;
 import wily.legacy.init.*;
+import wily.legacy.minigame.MinimegaResourceManager;
 import wily.legacy.mobcaps.LegacyMobCaps;
 import wily.legacy.network.*;
 import wily.legacy.skins.SkinsBootstrap;
@@ -105,6 +106,8 @@ public class Legacy4J {
     public static void init() {
         FactoryConfig.registerCommonStorage(createModLocation("common"), LegacyCommonOptions.COMMON_STORAGE);
         FactoryConfig.registerCommonStorage(createModLocation("mixin_common"), MIXIN_CONFIGS_STORAGE);
+        MinimegaResourceManager.init();
+        MinimegaRegistries.register();
         LegacyRegistries.register();
         LegacyGameRules.register();
         FactoryEvent.registerPayload(r -> {
@@ -141,6 +144,7 @@ public class Legacy4J {
         FactoryEvent.setup(Legacy4J::setup);
         FactoryEvent.serverStarted(Legacy4J::onServerStart);
         FactoryEvent.PlayerEvent.JOIN_EVENT.register(Legacy4J::onServerPlayerJoin);
+        FactoryEvent.PlayerEvent.RELOAD_RESOURCES_EVENT.register(MinimegaResourceManager::onResourcesReload);
         FactoryEvent.PlayerEvent.RELOAD_RESOURCES_EVENT.register(Legacy4J::onResourcesReload);
     }
 

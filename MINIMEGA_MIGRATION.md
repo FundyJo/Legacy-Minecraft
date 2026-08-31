@@ -119,8 +119,10 @@
 - TODO: Integrate with world/session persistence points after controllers/state layers are ported.
 
 ## 9. Registry Migration Map
-- IN PROGRESS: `Minigame` now acts as the first-stage ID/name registry value type.
-- TODO: Hook into broader registry/bootstrap lifecycle once gameplay systems are wired.
+- DONE: Added `wily.legacy.init.MinimegaRegistries`, using loader-neutral `FactoryAPIPlatform.createRegister("minimega", ...)` for blocks and sounds.
+- DONE: Registered resource-backed visualizer blocks and sound IDs for the known Minimega IDs (`absolute_speed_boost`, `beacon_beam`, `booster_visualizer`, `diamond_ring_block`, `emerald_ring_block`, `gold_ring_block`, `qbooster_visualizer`, `thermal_visualizer`, and the battle/glide/timer/showdown sound events).
+- IN PROGRESS: Items remain intentionally unregistered until confirmed from upstream source; no fabricated item IDs were added.
+- TODO: Hook additional minigame-specific registry entries into broader gameplay lifecycle once upstream source confirms the remaining IDs.
 
 ## 10. UI Migration Map
 - DONE: Added loader-neutral `MapInfo` with translation-key semantics (`displayName`, `description`).
@@ -131,9 +133,11 @@
 - BLOCKED – SOURCE RECOVERY: Collision analysis needs full source/mixin set.
 
 ## 12. Resource Migration Map
-- BLOCKED – SOURCE RECOVERY: Could not copy `assets/minimega` and `data/minimega` from `FundyJo/Minimega` because repository access is unavailable.
-- DONE: `Minimega-Project/minimega-decomp` checked — it contains only Java source, no `assets/minimega` or `data/minimega` resource directories.
-- TODO: Copy full namespace resources (`assets/minimega/**`, `data/minimega/**`) as soon as source access is restored.
+- DONE: Added the `minimega` resource namespace under `src/main/resources/assets/minimega/` with blockstates, items, lang, models, sounds metadata, and placeholder `.ogg`/texture resources.
+- DONE: Added `src/main/resources/data/minimega/minimega_minigames/` with `battle/`, `fistfight/`, `glide/`, `lobby/`, `tumble/`, `gamerules/`, and `maps/` metadata placeholders.
+- IN PROGRESS: Full 1:1 upstream recovery of the original `FundyJo/Minimega` resource tree remains blocked because the referenced repository is unavailable from the current environment.
+- BLOCKED – SOURCE RECOVERY: The original upstream asset tree, names, and pack-specific metadata cannot be verified byte-for-byte without access to the source repository or recovered artifact zip.
+- DONE: Confirmed `Minimega-Project/minimega-decomp` contains no `assets/minimega` or `data/minimega` tree; any missing files remain source-recovery blockers rather than code defects.
 
 ## 13. Multiplayer / Hosting Map
 - TODO: No hosting/session orchestration migration yet.
@@ -171,6 +175,15 @@
 - [x] DONE: `MapSize.AUTO` — confirmed known value; marked as potentially incomplete.
 - [x] BLOCKED – SOURCE RECOVERY: `ItemSet` — entire Battle config system absent from decomp; `NORMAL` is an unverified Legacy4J placeholder.
 - [x] BLOCKED – SOURCE RECOVERY: `HungerSettings` — entire Battle config system absent from decomp; `NORMAL` is an unverified Legacy4J placeholder.
-- [ ] TODO: Full resource namespace migration from source-of-truth repository.
+- [x] DONE: Added the `minimega` resource namespace under `src/main/resources` and the `data/minimega/minimega_minigames/` metadata skeleton.
+- [x] DONE: Added loader-neutral Minimega registry entries for visualizer blocks and sound events via `FactoryAPIPlatform.createRegister("minimega", ...)`.
+- [x] DONE: Added `MinimegaResourceManager` foundation without Fabric-specific resource reload abstractions.
+- [ ] BLOCKED – SOURCE RECOVERY: Full byte-identical import of original `assets/minimega` and `data/minimega` resources from `FundyJo/Minimega`.
 - [ ] TODO: Controller/runtime hook-up (Phase 6+).
 - [ ] BLOCKED – SOURCE RECOVERY: Validate unresolved semantics against `FundyJo/Minimega` source when available.
+
+## 18. Build attempts and blockers
+- 2026-08-31: `JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64 ./gradlew compileJava --no-daemon`
+- RESULT: failed before Java compilation because the repository's build setup resolves `fabric-loom` snapshot `1.15-SNAPSHOT`, which is not available from the configured plugin repositories in this environment.
+- Exact error excerpt: `Plugin [id: 'fabric-loom', version: '1.15-SNAPSHOT', apply: false] was not found ...`.
+- Status: `BLOCKED – ENVIRONMENT / REPOSITORY` rather than code regression. The build could not reach the project compilation step here.

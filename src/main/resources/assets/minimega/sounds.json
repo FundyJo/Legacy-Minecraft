@@ -1,0 +1,32 @@
+{
+  "battle.round_start": {
+    "sounds": [
+      "minimega:battle/round_start"
+    ]
+  },
+  "battle.theme": {
+    "sounds": [
+      "minimega:battle/theme"
+    ]
+  },
+  "glide.boost": {
+    "sounds": [
+      "minimega:glide/boost"
+    ]
+  },
+  "glide.theme": {
+    "sounds": [
+      "minimega:glide/theme"
+    ]
+  },
+  "timer.countdown": {
+    "sounds": [
+      "minimega:timer/countdown"
+    ]
+  },
+  "showdown.start": {
+    "sounds": [
+      "minimega:showdown/start"
+    ]
+  }
+}
