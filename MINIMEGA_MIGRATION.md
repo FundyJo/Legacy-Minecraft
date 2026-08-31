@@ -220,23 +220,23 @@ Status: IN PROGRESS (source-backed migration started on branch `copilot/featurem
 
 | Original class | Purpose | Dependencies | Client/server/common | FactoryAPI dependencies | Legacy4J target | Status |
 |---|---|---|---|---|---|---|
-| `dev.jab125.minimega.mod.util.controller.MinigamesController` | Per-level minigame controller owner and routing hub | `Minigame`, `AbstractMinigameController` | common/server | `FactoryEvent` lifecycle hooks | `wily.legacy.minigame.controller.MinigamesController` | PORTED (core lifecycle + payload routing) |
-| `dev.jab125.minimega.mod.util.controller.AbstractMinigameController` | Shared controller base lifecycle + player action hooks | `MinigamesController`, `MinigameData` | common/server | none | `wily.legacy.minigame.controller.AbstractMinigameController` | PORTED (shared base); concrete game controllers still BLOCKED – MINIGAME CONTROLLER MIGRATION |
+| `dev.jab125.minimega.mod.util.controller.MinigamesController` | Per-level minigame controller owner and routing hub | `Minigame`, `AbstractMinigameController` | common/server | `FactoryEvent` lifecycle hooks | `wily.legacy.minigame.controller.MinigamesController` | IN PROGRESS (routing skeleton exists, upstream attachment persistence/rules/player routing behavior incomplete) |
+| `dev.jab125.minimega.mod.util.controller.AbstractMinigameController` | Shared controller base lifecycle + player action hooks | `MinigamesController`, `MinigameData` | common/server | none | `wily.legacy.minigame.controller.AbstractMinigameController` | IN PROGRESS (base scaffold exists; upstream lifecycle/state side-effects not yet ported) |
 | `dev.jab125.minimega.mod.util.minigamedata.MinigameData` | Shared session/minigame setup state | config + map ids + minigame id | common | none | `wily.legacy.minigame.minigamedata.MinigameData` | PORTED |
 
 ### Networking Handler Activation Map
 
-| Payload | Legacy handler status | Note |
-|---|---|---|
-| `C2SFinishedMapLoadingPayload` | ACTIVE | routes to `MinigamesController.playerLoadedIn` |
-| `C2SReadyPayload` | ACTIVE | routes to `MinigamesController.playerReady` |
-| `C2SVotePayload` | ACTIVE | routes to `MinigamesController.playerVoted` |
-| `C2SRestartPayload` | ACTIVE | routes to `MinigamesController.playerRestart` |
-| `C2STimerSynchronizationPayload` | ACTIVE | routes to `MinigamesController.playerTimerSynchronization` |
-| `C2STakeAllPayload` | ACTIVE | routes to `MinigamesController.playerTakeAll` |
-| `C2SJoiningChoicePayload` | ACTIVE | routes to `MinigamesController.playerJoiningChoice` |
-| `C2SRecreationPayload` | ACTIVE | routes to `MinigamesController.playerRecreation` |
-| Remaining S2C/client-heavy payload handlers | BLOCKED | payload-specific blocker logs kept in `MinimegaNetworkHandlers` |
+| Payload | Original registration | Original handler method | Original controller call | Original state mutation | Original packet response | Legacy4J implementation | Parity status |
+|---|---|---|---|---|---|---|---|
+| `C2SFinishedMapLoadingPayload` | `ServerPlayNetworking.registerGlobalReceiver(C2SFinishedMapLoadingPayload.TYPE, ...)` in `Minimega.onInitialize` | inline lambda in `Minimega.onInitialize` | `MinigamesController.getMinigameController(level).playerLoadedIn(player)` | level null -> disconnect, otherwise delegate to active minigame controller | disconnect only on invalid/null level | `MinimegaNetworkHandlers.handleFinishedMapLoading` delegates to `playerLoadedIn` | IN PROGRESS |
+| `C2SReadyPayload` | `ServerPlayNetworking.registerGlobalReceiver(C2SReadyPayload.TYPE, ...)` in `Minimega.onInitialize` | inline lambda in `Minimega.onInitialize` | `MinigamesController.getMinigameController(level).playerReady(player, payload.ready())` | level null -> disconnect, otherwise mutate controller ready state | disconnect only on invalid/null level | `MinimegaNetworkHandlers.handleReady` delegates to `playerReady` | IN PROGRESS |
+| `C2SJoiningChoicePayload` | `ServerConfigurationNetworking.registerReceiver(..., C2SJoiningChoicePayload.TYPE, ...)` in `Minimega.completeLogin` | inline lambda in `Minimega.completeLogin` | no direct minigame-controller call; updates config connection extension | `mm$setMinigameData(wrap(payload.data()))` + `completeTask(CHOICE)` | advances configuration task chain | `C2SJoiningChoicePayload.apply` currently routes to `MinigamesController.playerJoiningChoice` only | IN PROGRESS |
+| `C2SVotePayload` | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | `MinimegaNetworkHandlers.handleVote` delegates to scaffold controller hook | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY |
+| `C2SRestartPayload` | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | `MinimegaNetworkHandlers.handleRestart` delegates to scaffold controller hook | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY |
+| `C2STimerSynchronizationPayload` | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | `MinimegaNetworkHandlers.handleTimerSynchronization` delegates to scaffold controller hook | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY |
+| `C2STakeAllPayload` | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | `MinimegaNetworkHandlers.handleTakeAll` delegates to scaffold controller hook | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY |
+| `C2SRecreationPayload` | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY | `C2SRecreationPayload.apply` routes to `MinigamesController.playerRecreation` only | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY |
+| Remaining S2C/client-heavy payload handlers | payload-specific upstream handlers partially unrecoverable or client-UI dependent | payload-specific | payload-specific | payload-specific | payload-specific | blocked logging stubs retained in `MinimegaNetworkHandlers` | IN PROGRESS |
 
 ### Full Payload Diff (FundyJo/Minimega: 32 sources)
 
@@ -277,4 +277,23 @@ Status: IN PROGRESS (source-backed migration started on branch `copilot/featurem
 
 ### ModNetworking.java parity check
 
-`wily.legacy.minigame.network.MinimegaNetwork.register()` now registers all source-backed payload IDs and directions from `dev.jab125.minimega.mod.networking.ModNetworking` except entries blocked by unrecoverable source dependencies (`S2CStatusPayload`, `S2CThermalsPayload`, `S2COpenDataScreenPayload`).
+`wily.legacy.minigame.network.MinimegaNetwork.register()` now binds FactoryAPI lifecycle directly (`serverStarted`, `serverStopping`, `afterServerTick`) without reflection.
+
+`player removed` lifecycle parity is currently `BLOCKED – FACTORYAPI ABSTRACTION`: no verified direct equivalent is used yet in common/server Minimega wiring.
+
+## Phase 5 – Lobby / Session / Lobby GUI
+
+Status: IN PROGRESS
+
+Lobby/session/gameplay-adjacent components remain in migration with strict source-backing from `FundyJo/Minimega`; no synthetic lobby/controller/UI substitute is marked DONE.
+
+## Future Phase Plan
+
+- Phase 5 – Lobby / Session / Lobby GUI: IN PROGRESS
+- Phase 6 – Battle Controller / Battle Gameplay: DEFERRED – BATTLE PHASE
+- Phase 7 – Battle GUI / HUD / shared Minigame UI: DEFERRED – BATTLE PHASE
+- Phase 8 – Glide Controller / Glide GUI: DEFERRED – GLIDE PHASE
+- Phase 9 – Tumble Controller / UI: DEFERRED – TUMBLE PHASE
+- Phase 10 – Fistfight Controller / UI: DEFERRED – FISTFIGHT PHASE
+- Phase 11 – Hosting / P2P / Matchmaking: IN PROGRESS
+- Phase 12 – Mixins / compatibility / parity cleanup: IN PROGRESS

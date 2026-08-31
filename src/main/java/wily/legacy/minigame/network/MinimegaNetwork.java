@@ -1,12 +1,8 @@
 package wily.legacy.minigame.network;
 
-import net.minecraft.server.MinecraftServer;
 import wily.factoryapi.FactoryEvent;
 import wily.legacy.minigame.controller.MinigamesController;
 import wily.legacy.minigame.network.payload.*;
-
-import java.lang.reflect.Method;
-import java.util.function.Consumer;
 
 public final class MinimegaNetwork {
     private MinimegaNetwork() {
@@ -46,32 +42,8 @@ public final class MinimegaNetwork {
         });
 
         FactoryEvent.serverStarted(MinigamesController::onServerStarted);
+        FactoryEvent.serverStopping(MinigamesController::onServerStopped);
+        FactoryEvent.afterServerTick(MinigamesController::onServerTick);
         FactoryEvent.PlayerEvent.JOIN_EVENT.register(MinigamesController::onPlayerJoin);
-
-        bindOptionalServerLifecycle("serverStopped", MinigamesController::onServerStopped);
-        bindOptionalServerLifecycle("preServerTick", MinigamesController::onServerTick);
-        bindOptionalPlayerRemoved();
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void bindOptionalServerLifecycle(String methodName, Consumer<MinecraftServer> callback) {
-        try {
-            Method method = FactoryEvent.class.getMethod(methodName, Consumer.class);
-            method.invoke(null, callback);
-        } catch (ReflectiveOperationException ignored) {
-        }
-    }
-
-    private static void bindOptionalPlayerRemoved() {
-        try {
-            Object event = FactoryEvent.PlayerEvent.class.getField("REMOVED_EVENT").get(null);
-            Method register = event.getClass().getMethod("register", Consumer.class);
-            register.invoke(event, (Consumer<Object>) player -> {
-                if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
-                    MinigamesController.onPlayerLeave(serverPlayer);
-                }
-            });
-        } catch (ReflectiveOperationException ignored) {
-        }
     }
 }
