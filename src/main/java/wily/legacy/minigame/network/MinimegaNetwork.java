@@ -1,6 +1,12 @@
 package wily.legacy.minigame.network;
 
+import net.minecraft.server.MinecraftServer;
 import wily.factoryapi.FactoryEvent;
+import wily.legacy.minigame.controller.MinigamesController;
+import wily.legacy.minigame.network.payload.*;
+
+import java.lang.reflect.Method;
+import java.util.function.Consumer;
 
 public final class MinimegaNetwork {
     private MinimegaNetwork() {
@@ -8,7 +14,64 @@ public final class MinimegaNetwork {
 
     public static void register() {
         FactoryEvent.registerPayload(r -> {
-            // Payload activation is deferred until controller migrations provide parity-safe handlers.
+            r.register(false, S2CJoiningChoicePayload.ID);
+            r.register(true, C2SJoiningChoicePayload.ID);
+            r.register(false, S2CLinkScreenUpdatePayload.ID);
+            r.register(true, C2SLinkScreenClosedPayload.ID);
+            r.register(false, S2CLinkPayload.ID);
+            r.register(true, C2SLinkPayload.ID);
+            r.register(true, C2SFinishedMapLoadingPayload.ID);
+            r.register(false, S2CDisplayTextPayload.ID);
+            r.register(false, S2CMapTransitionStartPayload.ID);
+            r.register(false, S2CScoreRingCollisionPayload.ID);
+            r.register(false, S2CGlideFinishPayload.ID);
+            r.register(false, S2CTimerSynchronizationPayload.ID);
+            r.register(false, S2CPlayerPositionsPayload.ID);
+            r.register(false, S2CCheckpointsRespawnUpdatePayload.ID);
+            r.register(false, S2CMatchToSubmit.ID);
+            r.register(false, S2CPlayerSlotObjPayload.ID);
+            r.register(false, S2CDisplayShieldPayload.ID);
+            r.register(false, S2CGlobalSoundPayload.ID);
+            r.register(true, C2SReadyPayload.ID);
+            r.register(true, C2SVotePayload.ID);
+            r.register(true, C2STimerSynchronizationPayload.ID);
+            r.register(true, C2SRestartPayload.ID);
+            r.register(true, C2STakeAllPayload.ID);
+            r.register(true, C2SSqueakPayload.ID);
+            r.register(true, C2SRecreationPayload.ID);
+            r.register(false, C2S2CMinimegaProtocolVersionPayload.ID);
+            r.register(false, S2CDownloadResourcePacksPayload.ID);
+            r.register(true, C2S2CMinimegaProtocolVersionPayload.ID);
+            r.register(true, C2SPacksDownloadedPayload.ID);
         });
+
+        FactoryEvent.serverStarted(MinigamesController::onServerStarted);
+        FactoryEvent.PlayerEvent.JOIN_EVENT.register(MinigamesController::onPlayerJoin);
+
+        bindOptionalServerLifecycle("serverStopped", MinigamesController::onServerStopped);
+        bindOptionalServerLifecycle("preServerTick", MinigamesController::onServerTick);
+        bindOptionalPlayerRemoved();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void bindOptionalServerLifecycle(String methodName, Consumer<MinecraftServer> callback) {
+        try {
+            Method method = FactoryEvent.class.getMethod(methodName, Consumer.class);
+            method.invoke(null, callback);
+        } catch (ReflectiveOperationException ignored) {
+        }
+    }
+
+    private static void bindOptionalPlayerRemoved() {
+        try {
+            Object event = FactoryEvent.PlayerEvent.class.getField("REMOVED_EVENT").get(null);
+            Method register = event.getClass().getMethod("register", Consumer.class);
+            register.invoke(event, (Consumer<Object>) player -> {
+                if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+                    MinigamesController.onPlayerLeave(serverPlayer);
+                }
+            });
+        } catch (ReflectiveOperationException ignored) {
+        }
     }
 }

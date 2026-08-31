@@ -17,7 +17,7 @@ public record C2STimerSynchronizationPayload(int number) implements CommonNetwor
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.handleTimerSynchronization(this, context);
     }
 
     @Override

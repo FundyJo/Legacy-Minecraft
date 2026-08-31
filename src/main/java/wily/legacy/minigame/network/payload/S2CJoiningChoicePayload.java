@@ -16,7 +16,7 @@ public record S2CJoiningChoicePayload() implements CommonNetwork.Payload {
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "client joining-choice UI migration pending");
     }
 
     @Override

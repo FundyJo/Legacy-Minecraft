@@ -26,7 +26,7 @@ public record S2CGlobalSoundPayload(Identifier id, Optional<BlockPos> pos) imple
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "client global sound flow migration pending");
     }
 
     @Override

@@ -18,7 +18,7 @@ public record S2CDisplayTextPayload(Component component) implements CommonNetwor
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "client display text migration pending");
     }
 
     @Override

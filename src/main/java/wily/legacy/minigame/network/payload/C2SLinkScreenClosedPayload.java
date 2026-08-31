@@ -16,7 +16,7 @@ public record C2SLinkScreenClosedPayload() implements CommonNetwork.Payload {
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "linking flow migration pending");
     }
 
     @Override

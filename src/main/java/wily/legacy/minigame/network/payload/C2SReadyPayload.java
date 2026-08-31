@@ -17,7 +17,7 @@ public record C2SReadyPayload(boolean ready) implements CommonNetwork.Payload {
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.handleReady(this, context);
     }
 
     @Override

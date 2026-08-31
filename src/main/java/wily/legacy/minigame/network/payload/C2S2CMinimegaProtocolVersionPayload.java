@@ -144,7 +144,7 @@ public record C2S2CMinimegaProtocolVersionPayload(int version) implements Common
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "protocol handshake integration pending");
     }
 
     @Override

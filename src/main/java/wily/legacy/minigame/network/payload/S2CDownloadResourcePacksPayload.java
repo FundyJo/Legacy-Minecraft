@@ -19,7 +19,7 @@ public record S2CDownloadResourcePacksPayload(List<MinimegaPackObj> packs) imple
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "client resource-pack flow migration pending");
     }
 
     @Override

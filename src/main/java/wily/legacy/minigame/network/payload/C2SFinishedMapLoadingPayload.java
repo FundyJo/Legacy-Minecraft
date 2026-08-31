@@ -16,7 +16,7 @@ public record C2SFinishedMapLoadingPayload() implements CommonNetwork.Payload {
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.handleFinishedMapLoading(this, context);
     }
 
     @Override

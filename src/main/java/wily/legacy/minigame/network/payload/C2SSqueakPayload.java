@@ -16,7 +16,7 @@ public record C2SSqueakPayload() implements CommonNetwork.Payload {
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "squeak gameplay migration pending");
     }
 
     @Override

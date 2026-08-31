@@ -17,7 +17,7 @@ public record S2CLinkPayload(String code) implements CommonNetwork.Payload {
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "client linking UI migration pending");
     }
 
     @Override

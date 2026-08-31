@@ -16,7 +16,7 @@ public record C2STakeAllPayload() implements CommonNetwork.Payload {
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.handleTakeAll(this, context);
     }
 
     @Override

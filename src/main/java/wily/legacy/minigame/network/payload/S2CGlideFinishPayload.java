@@ -23,7 +23,7 @@ public record S2CGlideFinishPayload(UUID playerUuid, int place, boolean bestResu
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "client glide finish flow migration pending");
     }
 
     @Override
