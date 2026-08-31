@@ -16,7 +16,7 @@ public record C2SPacksDownloadedPayload() implements CommonNetwork.Payload {
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "resource-pack session state migration pending");
     }
 
     @Override

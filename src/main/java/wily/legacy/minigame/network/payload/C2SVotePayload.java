@@ -18,7 +18,7 @@ public record C2SVotePayload(Identifier resourceLocation) implements CommonNetwo
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.handleVote(this, context);
     }
 
     @Override

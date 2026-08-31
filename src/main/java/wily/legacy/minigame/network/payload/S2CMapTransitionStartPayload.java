@@ -19,7 +19,7 @@ public record S2CMapTransitionStartPayload(MapInfo info, boolean inInSameLevel) 
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "client map transition migration pending");
     }
 
     @Override

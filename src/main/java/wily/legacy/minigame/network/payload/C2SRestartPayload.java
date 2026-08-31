@@ -17,7 +17,7 @@ public record C2SRestartPayload(boolean fromStart) implements CommonNetwork.Payl
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.handleRestart(this, context);
     }
 
     @Override

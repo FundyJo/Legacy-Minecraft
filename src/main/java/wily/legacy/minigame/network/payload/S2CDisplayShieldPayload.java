@@ -25,7 +25,7 @@ public record S2CDisplayShieldPayload(Identifier sprite, Component component, in
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "client display shield migration pending");
     }
 
     @Override

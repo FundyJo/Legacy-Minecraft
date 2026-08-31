@@ -22,7 +22,7 @@ public record S2CTimerSynchronizationPayload(Duration duration, int number, bool
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "client timer synchronization migration pending");
     }
 
     @Override

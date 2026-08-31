@@ -203,3 +203,78 @@ Status: `BLOCKED – ENVIRONMENT / DEPENDENCY RESOLUTION`.
 
 - `wily.legacy.minigame.network.MinimegaNetwork` added as central registration entry point.
 - Active payload registration remains **deferred** until parity-safe handlers are ported (controller migration dependency); no fake handlers were activated.
+
+## Phase 4 – Minimega State Machine + Controller Core Migration
+
+Status: IN PROGRESS (source-backed migration started on branch `copilot/featureminimega-controller-core`).
+
+### State Machine Migration Map
+
+| Original class | Purpose | Dependencies | Client/server/common | FactoryAPI dependencies | Legacy4J target | Status |
+|---|---|---|---|---|---|---|
+| `dev.jab125.minimega.mod.util.state.State` | Stack-state execution contract | none | common | none | `wily.legacy.minigame.state.State` (pending) | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY (upstream decompiler-artifact methods) |
+| `dev.jab125.minimega.mod.util.state.AbstractState` | Core op execution (`eqn/eq/eqJS/and/or/not/concat/addn/dup/fetch`) | `State` | common | none | `wily.legacy.minigame.state.AbstractState` (pending) | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY |
+| `dev.jab125.minimega.mod.util.state.ConditionParser` | Condition parser + instruction stream builder | `State` | common | none | `wily.legacy.minigame.state.ConditionParser` (pending) | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY |
+
+### Controller Migration Map
+
+| Original class | Purpose | Dependencies | Client/server/common | FactoryAPI dependencies | Legacy4J target | Status |
+|---|---|---|---|---|---|---|
+| `dev.jab125.minimega.mod.util.controller.MinigamesController` | Per-level minigame controller owner and routing hub | `Minigame`, `AbstractMinigameController` | common/server | `FactoryEvent` lifecycle hooks | `wily.legacy.minigame.controller.MinigamesController` | PORTED (core lifecycle + payload routing) |
+| `dev.jab125.minimega.mod.util.controller.AbstractMinigameController` | Shared controller base lifecycle + player action hooks | `MinigamesController`, `MinigameData` | common/server | none | `wily.legacy.minigame.controller.AbstractMinigameController` | PORTED (shared base); concrete game controllers still BLOCKED – MINIGAME CONTROLLER MIGRATION |
+| `dev.jab125.minimega.mod.util.minigamedata.MinigameData` | Shared session/minigame setup state | config + map ids + minigame id | common | none | `wily.legacy.minigame.minigamedata.MinigameData` | PORTED |
+
+### Networking Handler Activation Map
+
+| Payload | Legacy handler status | Note |
+|---|---|---|
+| `C2SFinishedMapLoadingPayload` | ACTIVE | routes to `MinigamesController.playerLoadedIn` |
+| `C2SReadyPayload` | ACTIVE | routes to `MinigamesController.playerReady` |
+| `C2SVotePayload` | ACTIVE | routes to `MinigamesController.playerVoted` |
+| `C2SRestartPayload` | ACTIVE | routes to `MinigamesController.playerRestart` |
+| `C2STimerSynchronizationPayload` | ACTIVE | routes to `MinigamesController.playerTimerSynchronization` |
+| `C2STakeAllPayload` | ACTIVE | routes to `MinigamesController.playerTakeAll` |
+| `C2SJoiningChoicePayload` | ACTIVE | routes to `MinigamesController.playerJoiningChoice` |
+| `C2SRecreationPayload` | ACTIVE | routes to `MinigamesController.playerRecreation` |
+| Remaining S2C/client-heavy payload handlers | BLOCKED | payload-specific blocker logs kept in `MinimegaNetworkHandlers` |
+
+### Full Payload Diff (FundyJo/Minimega: 32 sources)
+
+| Payload source class | Classification |
+|---|---|
+| C2S2CMinimegaProtocolVersionPayload | PORTED |
+| C2SFinishedMapLoadingPayload | PORTED |
+| C2SJoiningChoicePayload | PORTED |
+| C2SLinkPayload | PORTED |
+| C2SLinkScreenClosedPayload | PORTED |
+| C2SPacksDownloadedPayload | PORTED |
+| C2SReadyPayload | PORTED |
+| C2SRecreationPayload | PORTED |
+| C2SRestartPayload | PORTED |
+| C2SSqueakPayload | PORTED |
+| C2STakeAllPayload | PORTED |
+| C2STimerSynchronizationPayload | PORTED |
+| C2SVotePayload | PORTED |
+| MinimegaPackObj | SHARED DATA TYPE |
+| S2CCheckpointsRespawnUpdatePayload | PORTED |
+| S2CDisplayShieldPayload | PORTED |
+| S2CDisplayTextPayload | PORTED |
+| S2CDownloadResourcePacksPayload | PORTED |
+| S2CGlideFinishPayload | PORTED |
+| S2CGlobalSoundPayload | PORTED |
+| S2CJoiningChoicePayload | PORTED |
+| S2CLinkPayload | PORTED |
+| S2CLinkScreenUpdatePayload | PORTED |
+| S2CMapTransitionStartPayload | PORTED |
+| S2CMatchToSubmit | PORTED |
+| S2COpenDataScreenPayload | MISSING (BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY for `NewScreenData`/GUI-mode semantics) |
+| S2CPlayerPositionsPayload | PORTED |
+| S2CPlayerSlotObjPayload | PORTED |
+| S2CScoreRingCollisionPayload | PORTED |
+| S2CStatusPayload | MISSING (BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY) |
+| S2CThermalsPayload | MISSING (BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY; upstream thermal data model not recoverable in source snapshot) |
+| S2CTimerSynchronizationPayload | PORTED |
+
+### ModNetworking.java parity check
+
+`wily.legacy.minigame.network.MinimegaNetwork.register()` now registers all source-backed payload IDs and directions from `dev.jab125.minimega.mod.networking.ModNetworking` except entries blocked by unrecoverable source dependencies (`S2CStatusPayload`, `S2CThermalsPayload`, `S2COpenDataScreenPayload`).

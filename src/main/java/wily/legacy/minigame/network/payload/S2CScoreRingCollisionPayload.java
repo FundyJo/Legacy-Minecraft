@@ -21,7 +21,7 @@ public record S2CScoreRingCollisionPayload(int level, UUID uuid, int points) imp
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "client glide ring collision migration pending");
     }
 
     @Override

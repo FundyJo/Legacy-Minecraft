@@ -20,7 +20,7 @@ public record S2CCheckpointsRespawnUpdatePayload(int checkpoint, int respawnChec
 
     @Override
     public void apply(Context context) {
-        MinimegaNetworkHandlers.blocked(this, context);
+        MinimegaNetworkHandlers.blockedPayload(this, "client checkpoint HUD migration pending");
     }
 
     @Override
