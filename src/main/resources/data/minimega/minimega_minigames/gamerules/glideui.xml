@@ -1,0 +1,58 @@
+<GameMode>
+    <!-- custom format -->
+    <HostOptions version="4">
+        <Options>
+            <TemplateDef id="onlineGame">
+                <!-- default: false -->
+                <Toggle id="onlineGame" default="false"/>
+            </TemplateDef>
+            <EnabledIf condition="onlineGame">
+                <TemplateDef id="publicGame" default="false">
+                    <!-- default: false -->
+                    <Toggle id="publicGame" default="false"/>
+                </TemplateDef>
+                <TemplateDef id="allowFriendsOfFriends">
+                    <!-- default: false -->
+                    <Toggle id="allowFriendsOfFriends" default="false"/>
+                </TemplateDef>
+                <TemplateDef id="inviteOnly">
+                    <!-- default: false -->
+                    <Toggle id="inviteOnly" default="false"/>
+                </TemplateDef>
+            </EnabledIf>
+            <EnabledIf condition="solo,onlineGame,not!,and!,not!">
+                <TemplateDef id="gameSize">
+                    <!-- ()|(4|8)|(8|16); default: largest -->
+                    <GameSizeSlider id="gameSize"/>
+                </TemplateDef>
+            </EnabledIf>
+            <EnabledIf condition="onlineGame,not!">
+                <TemplateDef id="solo">
+                    <!-- default: false -->
+                    <Toggle id="solo" default="false"/>
+                </TemplateDef>
+            </EnabledIf>
+            <TemplateDef id="gameType">
+                <!-- Time Attack|Score Attack; default: Casual -->
+                <BasicSlider id="gameType" loctype="1" default="0">0 1</BasicSlider>
+            </TemplateDef>
+            <TemplateDef id="selectMaps">
+                <Button loc="selectMaps" action="selectMaps"/>
+            </TemplateDef>
+
+        </Options>
+        <FrontPage>
+            <UseTemplate id="onlineGame"/>
+            <UseTemplate id="publicGame"/>
+            <UseTemplate id="allowFriendsOfFriends"/>
+            <UseTemplate id="inviteOnly"/>
+            <UseTemplate id="solo"/>
+            <UseTemplate id="selectMaps"/>
+            <UseTemplate id="gameType"/>
+            <UseTemplate id="gameSize"/>
+        </FrontPage>
+    </HostOptions>
+    <Triggers>
+        <Trigger id="create" script="gameType,solo,createGlideConfig!,gameSize,onlineGame,publicGame,createGame!"/>
+    </Triggers>
+</GameMode>

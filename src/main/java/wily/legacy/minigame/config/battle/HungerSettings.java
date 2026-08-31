@@ -7,17 +7,13 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 
 /**
- * BLOCKED – SOURCE RECOVERY
+ * BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY.
  *
- * <p>The Battle minigame is absent from {@code Minimega-Project/minimega-decomp}; no original
- * source for {@code HungerSettings} could be recovered. The single constant {@code NORMAL} is a
- * Legacy4J placeholder and must <em>not</em> be treated as a verified 1:1 Minimega value.
- *
- * <p>Do not add further constants without confirmed Minimega source. When original source
- * becomes available, replace this enum in full and verify codec / stream-codec order.
+ * <p>{@code FundyJo/Minimega} currently has
+ * {@code dev/jab125/minimega/mod/util/minigamedata/battle/HungerSettings.java} as
+ * {@code // INTERNAL ERROR //}, so enum/value parity cannot be confirmed directly.
  */
 public enum HungerSettings implements StringRepresentable {
-    /** UNVERIFIED PLACEHOLDER – source not recovered. */
     NORMAL("normal");
 
     public static final Codec<HungerSettings> CODEC = StringRepresentable.fromEnum(HungerSettings::values);

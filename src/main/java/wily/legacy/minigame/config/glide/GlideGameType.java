@@ -6,12 +6,13 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 /**
- * Verified against Minimega-Project/minimega-decomp:
- * dev/jab125/minimega/util/controller/glide/GlideGameType.java
+ * NEEDS FUNDYJO/MINIMEGA VERIFICATION.
  *
- * Original values (ordinal order): TIME_ATTACK (0), SCORE_ATTACK (1)
- * Original CODEC: Codec.INT.xmap(a -> values()[a], Enum::ordinal) — integer-ordinal, not string-based.
- * STREAM_CODEC is a Legacy4J addition (not present in original); ordinal order preserved.
+ * <p>{@code FundyJo/Minimega} currently contains
+ * {@code dev/jab125/minimega/mod/util/controller/glide/GlideGameType.java} as
+ * {@code // INTERNAL ERROR //}, so enum/body parity cannot be directly confirmed.
+ * Current constants and ordinal codecs are preserved as existing migration behavior
+ * until source recovery is available inside {@code FundyJo/Minimega}.
  */
 public enum GlideGameType {
     TIME_ATTACK,
@@ -19,10 +20,8 @@ public enum GlideGameType {
 
     private static final GlideGameType[] VALUES = values();
 
-    // Matches original: Codec.INT.xmap(a -> values()[a], Enum::ordinal)
     public static final Codec<GlideGameType> CODEC = Codec.INT.xmap(i -> VALUES[i], Enum::ordinal);
 
-    // Legacy4J addition: stream codec for network use, ordinal order preserved.
     public static final StreamCodec<ByteBuf, GlideGameType> STREAM_CODEC = new StreamCodec<>() {
         @Override
         public GlideGameType decode(ByteBuf buffer) {

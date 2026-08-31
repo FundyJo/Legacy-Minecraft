@@ -7,11 +7,11 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 
 /**
- * Confirmed values: {@code BAT} and {@code INVISIBLE} are verified known constants
- * per issue specification. The complete set may be larger — the Battle minigame is
- * absent from {@code Minimega-Project/minimega-decomp}.
+ * BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY.
  *
- * <p>Do not add further constants without confirmed Minimega source.
+ * <p>{@code FundyJo/Minimega} currently has
+ * {@code dev/jab125/minimega/mod/util/minigamedata/battle/SpectatorMode.java} as
+ * {@code // INTERNAL ERROR //}, so enum/value parity cannot be confirmed directly.
  */
 public enum SpectatorMode implements StringRepresentable {
     BAT("bat"),

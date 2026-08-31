@@ -1,0 +1,1 @@
+{"rules":[{"for":"controlify:inventory","where":"left","forbid":[],"then":"Look Behind"},{"for":"controlify:swap_hands","where":"right","then":"Restart Section","when":["minimega:axalxefox"]},{"for":"controlify:drop","where":"right","then":"Restart Race","when":["minimega:axalxefox"]}],"override":false}

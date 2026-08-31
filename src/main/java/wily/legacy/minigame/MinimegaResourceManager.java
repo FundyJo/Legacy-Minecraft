@@ -7,13 +7,12 @@ public final class MinimegaResourceManager {
     }
 
     public static void init() {
-        // Resource recovery is currently blocked because no verified upstream Minimega
-        // asset tree was found in the available sources. Keep this class inert and do
-        // not register fake resource directories while source parity remains unresolved.
+        // Phase-2 runtime wiring remains intentionally inert until FundyJo/Minimega-backed
+        // loader parity is implemented in Legacy4J. Resources may exist on disk, but no
+        // synthetic loader behavior should be introduced here.
     }
 
     public static void onResourcesReload(PlayerList playerList) {
-        // No-op: Legacy4J should not initialize or reload synthetic Minimega resources
-        // before the original assets are recovered and verified.
+        // No-op by design until FundyJo/Minimega loader parity is implemented.
     }
 }
