@@ -4,10 +4,81 @@
 - DONE: Target repository validated as `FundyJo/Legacy-Minecraft`.
 - DONE: Requested branch `feature/minimega-integration` was fetched and used.
 - DONE: Current target start commit confirmed: `cb7c0b270ede4cd9a936fd5b2fffc1ed7f3b661b`.
+- DONE: Source parity review against `Minimega-Project/minimega-decomp` performed.
 - IN PROGRESS: First loader-neutral Minimega core/data/config stage.
-- BLOCKED – SOURCE RECOVERY: Source-of-truth repository `FundyJo/Minimega` is not currently accessible in this environment (GitHub API returns 404), so unresolved semantics are being deferred until direct source access is restored.
-- BLOCKED – SOURCE RECOVERY: Old/indexed minigame implementation commit reference `06cdc412...` could not be resolved in fetched history of this repository.
-- DONE: Verified that `wily.legacy.minigame.*` is not present on current `main` at the starting commit.
+- BLOCKED – SOURCE RECOVERY: `FundyJo/Minimega` is inaccessible (GitHub API returns 404). Unresolved semantics deferred until access is restored.
+- BLOCKED – SOURCE RECOVERY: Commit reference `06cdc412...` could not be resolved in fetched history.
+- DONE: Verified `wily.legacy.minigame.*` is absent on `main` at the starting commit.
+
+## Source Parity Review — minimega-decomp vs Legacy4J port
+
+### `Minigame` (wily.legacy.minigame.Minigame)
+- Original (`dev/jab125/minimega/util/Minigame.java`):
+  - IDs confirmed: NONE=0, GLIDE=3, FISTFIGHT=70, LOBBY=99
+  - CODEC: `Codec.INT` / `fromId(int)` (integer-id based)
+  - No BATTLE or TUMBLE constants in original
+- Legacy4J port:
+  - DONE: NONE, GLIDE, FISTFIGHT, LOBBY with correct IDs confirmed.
+  - BLOCKED – SOURCE RECOVERY: `BATTLE` (id=1) and `TUMBLE` (id=2) are Legacy4J additions not present in decomp. IDs/names/progress values are unverified best-effort. Must be validated when Battle/Tumble source is available.
+
+### `GlideGameType` (wily.legacy.minigame.config.glide.GlideGameType)
+- Original (`dev/jab125/minimega/util/controller/glide/GlideGameType.java`):
+  - Constants (exact order): `TIME_ATTACK` (ordinal 0), `SCORE_ATTACK` (ordinal 1)
+  - CODEC: `Codec.INT.xmap(a -> values()[a], Enum::ordinal)` — **integer-ordinal, not string-based**
+  - No STREAM_CODEC in original (not a network payload in source)
+- Legacy4J port (CORRECTED):
+  - DONE: Constants match original (TIME_ATTACK ordinal 0, SCORE_ATTACK ordinal 1).
+  - DONE: CODEC corrected to `Codec.INT.xmap(...)` matching original (was incorrectly using `StringRepresentable.fromEnum`).
+  - DONE: STREAM_CODEC retained as Legacy4J addition with correct ordinal order.
+
+### `ItemSet` (wily.legacy.minigame.config.battle.ItemSet)
+- BLOCKED – SOURCE RECOVERY: Battle minigame absent from `minimega-decomp`. No original source found.
+- Current value `NORMAL("normal")` is a Legacy4J placeholder — **not a verified Minimega value**.
+- Class retained for compilation; marked with BLOCKED javadoc. Do not treat as 1:1 Minimega port.
+
+### `HungerSettings` (wily.legacy.minigame.config.battle.HungerSettings)
+- BLOCKED – SOURCE RECOVERY: Battle minigame absent from `minimega-decomp`. No original source found.
+- Current value `NORMAL("normal")` is a Legacy4J placeholder — **not a verified Minimega value**.
+- Class retained for compilation; marked with BLOCKED javadoc. Do not treat as 1:1 Minimega port.
+
+### `RoundLength` (wily.legacy.minigame.config.battle.RoundLength)
+- BLOCKED – SOURCE RECOVERY (partially confirmed): `NORMAL` is a confirmed known value per issue specification.
+- Additional constants (e.g. SHORT, LONG) may exist — Battle minigame absent from `minimega-decomp`.
+- Class retained; marked with BLOCKED javadoc noting incomplete constant set.
+
+### `MapSize` (wily.legacy.minigame.config.battle.MapSize)
+- BLOCKED – SOURCE RECOVERY (partially confirmed): `AUTO` is a confirmed known value per issue specification.
+- Additional constants (e.g. SMALL, LARGE) may exist — Battle minigame absent from `minimega-decomp`.
+- Class retained; marked with BLOCKED javadoc noting incomplete constant set.
+
+### `SpectatorMode` (wily.legacy.minigame.config.battle.SpectatorMode)
+- Confirmed values: `BAT` (ordinal 0), `INVISIBLE` (ordinal 1) — verified per issue specification.
+- Additional constants may exist — Battle minigame absent from `minimega-decomp`.
+- Class retained with source note.
+
+### `Lives` (wily.legacy.minigame.config.battle.Lives)
+- Structure confirmed: sealed interface with `Infinite` (encodes as int 0) and `Numbered(int amount)`.
+- CODEC: `Codec.INT.xmap(Lives::fromAmount, Lives::asAmount)` — matches port.
+
+### `BattleConfigSettings` / `CasualBattleConfigSettings` / `CompetitiveBattleConfigSettings`
+- BLOCKED – SOURCE RECOVERY: Battle minigame absent from `minimega-decomp`. Entire battle config system is a Legacy4J addition.
+- `CasualBattleConfigSettings` and `CompetitiveBattleConfigSettings` are correctly implemented as unit records.
+- `PreconfiguredBattleConfigSettings` fields/order matches the intended design but cannot be verified against original.
+
+### `NoConfig` (wily.legacy.minigame.config.NoConfig)
+- Confirmed: unit type, `Codec.unit(INSTANCE)`, no-op encode. Correct.
+
+### `BattleConfig` / `GlideConfig` (wily.legacy.minigame.config)
+- Battle minigame absent from decomp — BattleConfig is Legacy4J addition (BLOCKED – SOURCE RECOVERY).
+- GlideConfig is a Legacy4J addition wrapping confirmed `GlideGameType`.
+
+### `MapInfo`, `MapData`, `MapVariant`, `MapVariants`, `BattleVariants`, `NormalVariants`
+- These are Legacy4J data model additions. No equivalent in decomp.
+- Structures appear sound for the intended purpose.
+
+### `MinigameSpecificConfig`, `MinigameConfigCodecs`
+- Legacy4J additions providing sealed dispatch codec infrastructure.
+- No equivalent in decomp; purpose-built for this integration stage.
 
 ## 1. Architecture Overview
 - DONE: Introduced a new loader-neutral package root: `wily.legacy.minigame`.
@@ -61,6 +132,7 @@
 
 ## 12. Resource Migration Map
 - BLOCKED – SOURCE RECOVERY: Could not copy `assets/minimega` and `data/minimega` from `FundyJo/Minimega` because repository access is unavailable.
+- DONE: `Minimega-Project/minimega-decomp` checked — it contains only Java source, no `assets/minimega` or `data/minimega` resource directories.
 - TODO: Copy full namespace resources (`assets/minimega/**`, `data/minimega/**`) as soon as source access is restored.
 
 ## 13. Multiplayer / Hosting Map
@@ -78,26 +150,27 @@
 ## 16. Ordered Migration Phases
 1. DONE: Establish migration plan and package scaffold.
 2. DONE: Port first-stage loader-neutral core/data/config classes and codecs.
-3. TODO: Migrate/verify minimega resource namespace.
-4. TODO: Introduce map/state persistence integration points.
-5. TODO: Add networking payloads + protocol adapters.
-6. TODO: Hook controller factories and gameplay controllers.
-7. TODO: Port client UI/rendering layers.
-8. TODO: Port and resolve mixins/events.
-9. TODO: Feature parity verification across loaders and versions.
+3. DONE: Source parity review against `Minimega-Project/minimega-decomp`; corrected `GlideGameType.CODEC`; documented all BLOCKED types.
+4. TODO: Migrate/verify minimega resource namespace.
+5. TODO: Introduce map/state persistence integration points.
+6. TODO: Add networking payloads + protocol adapters.
+7. TODO: Hook controller factories and gameplay controllers.
+8. TODO: Port client UI/rendering layers.
+9. TODO: Port and resolve mixins/events.
+10. TODO: Feature parity verification across loaders and versions.
 
 ## 17. Feature Parity Checklist
-- [x] DONE: Initial minigame value registry type (`Minigame`) with preserved IDs/names/progress/playable metadata.
+- [x] DONE: Initial minigame value registry type (`Minigame`) — confirmed IDs for NONE/GLIDE/FISTFIGHT/LOBBY; BATTLE/TUMBLE flagged as unverified Legacy4J additions.
 - [x] DONE: Loader-neutral core map/config model class scaffolding and codecs.
-- [x] DONE: `NoConfig` unit codec + unit stream codec.
-- [x] DONE: `Lives` integer mapping semantics (`<=0` infinite, `>0` numbered).
-- [x] DONE: Required first-stage confirmed constants:
-  - `GlideGameType`: `TIME_ATTACK`, `SCORE_ATTACK`
-  - `RoundLength`: `NORMAL`
-  - `MapSize`: `AUTO`
-  - `SpectatorMode`: `BAT`, `INVISIBLE`
-  - `ItemSet`: `NORMAL`
-  - `HungerSettings`: `NORMAL`
+- [x] DONE: `NoConfig` unit codec + unit stream codec — confirmed correct.
+- [x] DONE: `Lives` integer mapping semantics (`<=0` infinite, `>0` numbered) — confirmed correct.
+- [x] DONE: `GlideGameType` codec CORRECTED to integer-ordinal (`Codec.INT.xmap`) matching original source.
+- [x] DONE: `GlideGameType` constants confirmed: `TIME_ATTACK` (ordinal 0), `SCORE_ATTACK` (ordinal 1).
+- [x] DONE: `SpectatorMode` — confirmed values: `BAT` (ordinal 0), `INVISIBLE` (ordinal 1).
+- [x] DONE: `RoundLength.NORMAL` — confirmed known value; marked as potentially incomplete.
+- [x] DONE: `MapSize.AUTO` — confirmed known value; marked as potentially incomplete.
+- [x] BLOCKED – SOURCE RECOVERY: `ItemSet` — entire Battle config system absent from decomp; `NORMAL` is an unverified Legacy4J placeholder.
+- [x] BLOCKED – SOURCE RECOVERY: `HungerSettings` — entire Battle config system absent from decomp; `NORMAL` is an unverified Legacy4J placeholder.
 - [ ] TODO: Full resource namespace migration from source-of-truth repository.
 - [ ] TODO: Controller/runtime hook-up (Phase 6+).
-- [ ] BLOCKED – SOURCE RECOVERY: Validate unresolved semantics against unavailable `FundyJo/Minimega` source and `06cdc412...` indexed implementation.
+- [ ] BLOCKED – SOURCE RECOVERY: Validate unresolved semantics against `FundyJo/Minimega` source when available.
