@@ -124,3 +124,82 @@ Plugin [id: 'fabric-loom', version: '1.15-SNAPSHOT', apply: false] was not found
 ```
 
 Status: `BLOCKED – ENVIRONMENT / DEPENDENCY RESOLUTION`.
+
+## Build (26.1.2-forge)
+
+Attempted:
+
+```bash
+JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64 ./gradlew :forge:compileJava --no-daemon
+```
+
+Observed exact failure:
+
+```text
+Plugin [id: 'fabric-loom', version: '1.15-SNAPSHOT', apply: false] was not found ...
+```
+
+Status: `BLOCKED – ENVIRONMENT / DEPENDENCY RESOLUTION`.
+
+## Build (26.1.2-neoforge)
+
+Attempted:
+
+```bash
+JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64 ./gradlew :neoforge:compileJava --no-daemon
+```
+
+Observed exact failure:
+
+```text
+Plugin [id: 'fabric-loom', version: '1.15-SNAPSHOT', apply: false] was not found ...
+```
+
+Status: `BLOCKED – ENVIRONMENT / DEPENDENCY RESOLUTION`.
+
+## Phase 3 – Networking Migration (FactoryAPI/CommonNetwork)
+
+- IN PROGRESS – payload data models/codecs are being ported under `wily.legacy.minigame.network.payload`.
+- `Minimega` Fabric networking abstraction (`ClientNetworking`, `ServerNetworking`, `PayloadRegistry`, `FabricClientNetworking`, `FabricServerNetworking`, `FabricPayloadRegistry`) -> **REPLACED BY FactoryAPI/CommonNetwork**.
+- Bootstrap hook added: `Legacy4J.init()` now calls `MinimegaNetwork.register()`.
+
+### Networking Migration Map
+
+| Original class | Identifier | Direction | Fields | Codec | Handler | Sender | Receiver | Thread/context | Side effects | Legacy4J target | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| C2SReadyPayload | `minimega:ready` | C2S | `boolean ready` | `BOOL` | ready-toggle logic in minigame controllers | client ready action | server play receiver | server main executor | match readiness state | `wily.legacy.minigame.network.payload.C2SReadyPayload` | IN PROGRESS |
+| C2SVotePayload | `minimega:vote` | C2S | `Identifier resourceLocation` | `Identifier` | vote selection in minigame controllers | voting UI | server play receiver | server main executor | map/mode vote updates | `...C2SVotePayload` | IN PROGRESS |
+| C2SRestartPayload | `minimega:c2srestart` | C2S | `boolean fromStart` | `BOOL` | restart controller path | restart UI | server play receiver | server main executor | restarts minigame round | `...C2SRestartPayload` | IN PROGRESS |
+| C2STakeAllPayload | `minimega:c2stakeall` | C2S | none | unit | battle/tumble inventory controller | take-all action | server play receiver | server main executor | bulk item transfer | `...C2STakeAllPayload` | IN PROGRESS |
+| C2STimerSynchronizationPayload | `minimega:c2s_timer_synchronization` | C2S | `int number` | `INT` | timer sync controller | client timer sync | server play receiver | server main executor | timer correction | `...C2STimerSynchronizationPayload` | IN PROGRESS |
+| C2S2CMinimegaProtocolVersionPayload | `minimega:protocol_version` | C2S+S2C config | `int version` | `INT` | protocol gate during configuration | both sides config handshake | both sides config receiver | configuration networking task | allows/blocks join | `...C2S2CMinimegaProtocolVersionPayload` | IN PROGRESS |
+| C2SFinishedMapLoadingPayload | `minimega:finished_map_loading` | C2S | none | unit | map loading transition controller | client post-load ack | server play receiver | server main executor | starts active gameplay | `...C2SFinishedMapLoadingPayload` | IN PROGRESS |
+| C2SLinkPayload | `minimega:c2slink` | C2S config | `String code (max 30)` | utf8(30) | discord/link flow | link UI submit | server config receiver | configuration networking task | account linking state | `...C2SLinkPayload` | IN PROGRESS |
+| C2SLinkScreenClosedPayload | `minimega:link_screen_closed` | C2S config | none | unit | discord/link flow | close link screen | server config receiver | configuration networking task | link flow task completion | `...C2SLinkScreenClosedPayload` | IN PROGRESS |
+| C2SPacksDownloadedPayload | `minimega:packs_downloaded` | C2S config | none | unit | packs gate flow | packs downloaded ack | server config receiver | configuration networking task | join gate progression | `...C2SPacksDownloadedPayload` | IN PROGRESS |
+| C2SSqueakPayload | `minimega:c2ssqueak` | C2S | none | unit | squeak interaction controller | client squeak action | server play receiver | server main executor | emote/sound/event trigger | `...C2SSqueakPayload` | IN PROGRESS |
+| C2SJoiningChoicePayload | `minimega:c2s_joining_choice` | C2S config | `CreateOrJoin data` | `CreateOrJoinCodecs.STREAM_CODEC` | joining controller | create/join flow UI | server config receiver | configuration networking task | lobby/match creation routing | target in `wily.legacy.minigame.network.payload` | BLOCKED – CONTROLLER MIGRATION |
+| C2SRecreationPayload | `minimega:c2srecreation` | C2S | `MinigameData data` | `MinigameData.STREAM_CODEC` | recreation controller | recreation UI | server play receiver | server main executor | match recreation state | target in `wily.legacy.minigame.network.payload` | BLOCKED – CONTROLLER MIGRATION |
+| S2CDisplayTextPayload | `minimega:display_text` | S2C | `Component component` | component | HUD/display-text client handler | server gameplay events | client play receiver | client executor | on-screen text display | `...S2CDisplayTextPayload` | IN PROGRESS |
+| S2CDisplayShieldPayload | `minimega:s2cdisplayshield` | S2C | `Identifier sprite`, `Component`, `varint priority` | id+component+varint | HUD/shield display handler | server gameplay events | client play receiver | client executor | shield/top-banner UI | `...S2CDisplayShieldPayload` | IN PROGRESS |
+| S2CGlideFinishPayload | `minimega:s2c_glide_finish` | S2C | `UUID playerUuid`, `varint place`, `boolean bestResult`, `GlideGameType` | uuid+varint+bool+enum codec | glide finish client handler | glide controller | client play receiver | client executor | finish placement/FX | `...S2CGlideFinishPayload` | IN PROGRESS |
+| S2CCheckpointsRespawnUpdatePayload | `minimega:s2crpup` | S2C | `int checkpoint`, `int respawnCheckpoint`, `boolean finishedMap`, `varint score` | int+int+bool+varint | glide checkpoint client handler | glide controller | client play receiver | client executor | respawn/checkpoint HUD | `...S2CCheckpointsRespawnUpdatePayload` | IN PROGRESS |
+| S2CTimerSynchronizationPayload | `minimega:s2c_timer_synchronization` | S2C | `Duration(seconds,nanos)`, `int number`, `boolean leaderboardCounted` | long+int+int+bool | timer sync client handler | server timer source | client play receiver | client executor | timer correction and LB flag | `...S2CTimerSynchronizationPayload` | IN PROGRESS |
+| S2CMapTransitionStartPayload | `minimega:map_transition_start` | S2C | `MapInfo info`, `boolean inInSameLevel` | `MapInfo.STREAM_CODEC`+bool | map transition client handler | server map controller | client play receiver | client executor | transition UI/state | `...S2CMapTransitionStartPayload` | IN PROGRESS |
+| S2CGlobalSoundPayload | `minimega:s2c_global_sound` | S2C | `Identifier id`, `Optional<BlockPos> pos` | id+optional blockpos | global sound client handler | server gameplay events | client play receiver | client executor | plays positional/global sound | `...S2CGlobalSoundPayload` | IN PROGRESS |
+| S2CLinkPayload | `minimega:s2clink` | S2C config | `String code (max 30)` | utf8(30) | config link client handler | server link flow | client config receiver | configuration task client-side | opens/updates link UI | `...S2CLinkPayload` | IN PROGRESS |
+| S2CLinkScreenUpdatePayload | `minimega:linkscreenpacket` | S2C config | `boolean successful` | bool | config link client handler | server link flow | client config receiver | configuration task client-side | updates link state | `...S2CLinkScreenUpdatePayload` | IN PROGRESS |
+| S2CJoiningChoicePayload | `minimega:s2c_joining_choice` | S2C config | none | unit | config join-choice client handler | server config | client config receiver | configuration task client-side | opens join-choice flow | `...S2CJoiningChoicePayload` | IN PROGRESS |
+| S2CDownloadResourcePacksPayload | `minimega:download_resource_packs` | S2C config | `List<MinimegaPackObj>` | list(packId,url,hash,required) | packs download client flow | server config | client config receiver | configuration task client-side | enqueues required packs | `...S2CDownloadResourcePacksPayload`, `...MinimegaPackObj` | IN PROGRESS |
+| S2CStatusPayload | unknown (`// INTERNAL ERROR //` in source) | S2C | unknown | unknown | status UI handler | server gameplay events | client play receiver | client executor | status indicator updates | target in `wily.legacy.minigame.network.payload` | BLOCKED – FUNDYJO/MINIMEGA SOURCE RECOVERY |
+| S2CThermalsPayload | `minimega:thermals` | S2C | `List<GlideMinigameController.Thermal>` | list(Thermal codec) | glide thermal client handler | glide controller | client play receiver | client executor | thermal ring behavior | target in `wily.legacy.minigame.network.payload` | BLOCKED – CONTROLLER MIGRATION |
+| S2CPlayerPositionsPayload | `minimega:s2c_player_positions` | S2C | `List<PlayerInformation>` | list(PlayerInformation codec) | glide HUD positions | glide controller | client play receiver | client executor | player position overlays | target in `wily.legacy.minigame.network.payload` | BLOCKED – CONTROLLER MIGRATION |
+| S2CPlayerSlotObjPayload | `minimega:s2c_playerslotobjspayload` | S2C | `PlayerSlotObjs objs` | `PlayerSlotObjs.STREAM_CODEC` | slot object client handler | server gameplay/controller | client play receiver | client executor | UI slot state updates | target in `wily.legacy.minigame.network.payload` | BLOCKED – CONTROLLER MIGRATION |
+| S2COpenDataScreenPayload | `minimega:s2copendatascreen` | S2C | `Minigame`, `NewScreenData` | minigame idMapper + `NewScreenData.STREAM_CODEC` | open data screen client handler | server controller | client play receiver | client executor | opens config/data UI | target in `wily.legacy.minigame.network.payload` | BLOCKED – CONTROLLER MIGRATION |
+| S2CMatchToSubmit | `minimega:s2cmatchtosubmit` | S2C | `SubmitGlideMatchObj` | composite(map,duration,type,place,checkpointCount,deathCount,sentToServer,verified) | post-match submit client handler | glide server controller | client play receiver | client executor | matchmaking submission | target in `wily.legacy.minigame.network.payload` | BLOCKED – CONTROLLER MIGRATION |
+| S2CScoreRingCollisionPayload | `minimega:score_ring_collision` | S2C | `int level`, `UUID uuid`, `varint points` | int+uuid+varint | glide ring collision handler | glide controller | client play receiver | client executor | score updates and FX | `...S2CScoreRingCollisionPayload` | IN PROGRESS |
+
+### Registration status
+
+- `wily.legacy.minigame.network.MinimegaNetwork` added as central registration entry point.
+- Active payload registration remains **deferred** until parity-safe handlers are ported (controller migration dependency); no fake handlers were activated.
