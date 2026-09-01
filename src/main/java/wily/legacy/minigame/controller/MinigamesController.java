@@ -50,7 +50,7 @@ public final class MinigamesController {
     }
 
     public static void onPlayerLeave(ServerPlayer player) {
-        getMinigameController(player.serverLevel());
+        getMinigameController(player.serverLevel()).playerRemoved(player);
     }
 
     public Minigame getActiveMinigame() {
@@ -76,6 +76,10 @@ public final class MinigamesController {
 
     public void playerLoadedIn(ServerPlayer player) {
         minigameController.playerLoadedIn(player);
+    }
+
+    public void playerRemoved(ServerPlayer player) {
+        minigameController.playerRemoved(player);
     }
 
     public void playerReady(ServerPlayer player, boolean ready) {

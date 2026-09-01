@@ -23,7 +23,7 @@ Validated against repository snapshot:
 
 - `wily.legacy.minigame.Minigame`
   - IDs and names confirmed from `src/main/java/dev/jab125/minimega/mod/util/Minigame.java`
-  - `NONE=0`, `BATTLE=1`, `TUMBLE=2`, `GLIDE=3`, `FISTFIGHT=70`, `LOBBY=99`
+  - `NONE=0`, `BATTLE=1`, `TUMBLE=2`, `GLIDE=3`, `LOBBY=99`
 - `wily.legacy.minigame.data.*`
   - `MapInfo`, `MapData`, `MapVariant`, `MapVariants`, `BattleVariants`, `NormalVariants` remain source-backed by `src/main/java/dev/jab125/minimega/mod/data/*`
 - `wily.legacy.minigame.config.BattleConfig`
@@ -279,7 +279,12 @@ Status: IN PROGRESS (source-backed migration started on branch `copilot/featurem
 
 `wily.legacy.minigame.network.MinimegaNetwork.register()` now binds FactoryAPI lifecycle directly (`serverStarted`, `serverStopping`, `afterServerTick`) without reflection.
 
-`player removed` lifecycle parity is currently `BLOCKED – FACTORYAPI ABSTRACTION`: no verified direct equivalent is used yet in common/server Minimega wiring.
+`player removed` lifecycle parity now uses FactoryAPI directly via `FactoryEvent.PlayerEvent.REMOVED_EVENT`.
+
+## OUT OF SCOPE – FISTFIGHT
+
+Fistfight is intentionally excluded from the Legacy4J Minimega integration.
+No Fistfight gameplay, controller, UI, resources, networking, maps, or configuration will be migrated.
 
 ## Phase 5 – Lobby / Session / Lobby GUI
 
@@ -292,8 +297,8 @@ Lobby/session/gameplay-adjacent components remain in migration with strict sourc
 - Phase 5 – Lobby / Session / Lobby GUI: IN PROGRESS
 - Phase 6 – Battle Controller / Battle Gameplay: DEFERRED – BATTLE PHASE
 - Phase 7 – Battle GUI / HUD / shared Minigame UI: DEFERRED – BATTLE PHASE
-- Phase 8 – Glide Controller / Glide GUI: DEFERRED – GLIDE PHASE
-- Phase 9 – Tumble Controller / UI: DEFERRED – TUMBLE PHASE
-- Phase 10 – Fistfight Controller / UI: DEFERRED – FISTFIGHT PHASE
-- Phase 11 – Hosting / P2P / Matchmaking: IN PROGRESS
-- Phase 12 – Mixins / compatibility / parity cleanup: IN PROGRESS
+- Phase 8 – Glide Controller / Glide Gameplay / Glide GUI: DEFERRED – GLIDE PHASE
+- Phase 9 – Tumble Controller / Tumble Gameplay / Tumble GUI: DEFERRED – TUMBLE PHASE
+- Phase 10 – Hosting / P2P / Matchmaking: IN PROGRESS
+- Phase 11 – Mixins / compatibility / parity cleanup: IN PROGRESS
+- Phase 12 – Full parity / cleanup / loader/version validation: IN PROGRESS

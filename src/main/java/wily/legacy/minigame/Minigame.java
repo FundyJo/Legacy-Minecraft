@@ -22,10 +22,9 @@ public final class Minigame implements Iterable<Minigame> {
     public static final Minigame BATTLE = new Minigame(1, "battle", 0.67F, true);
     public static final Minigame TUMBLE = new Minigame(2, "tumble", 0.32F, false);
     public static final Minigame GLIDE = new Minigame(3, "glide", 0.93F, true);
-    public static final Minigame FISTFIGHT = new Minigame(70, "fistfight", 1.0F, true);
     public static final Minigame LOBBY = new Minigame(99, "lobby", 0.75F, true);
 
-    private static final List<Minigame> VALUES = List.of(NONE, BATTLE, TUMBLE, GLIDE, FISTFIGHT, LOBBY);
+    private static final List<Minigame> VALUES = List.of(NONE, BATTLE, TUMBLE, GLIDE, LOBBY);
     private static final Map<Integer, Minigame> BY_ID = new LinkedHashMap<>();
     private static final Map<String, Minigame> BY_NAME = new LinkedHashMap<>();
 
