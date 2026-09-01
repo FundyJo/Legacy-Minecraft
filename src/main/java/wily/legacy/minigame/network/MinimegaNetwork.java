@@ -45,5 +45,6 @@ public final class MinimegaNetwork {
         FactoryEvent.serverStopping(MinigamesController::onServerStopped);
         FactoryEvent.afterServerTick(MinigamesController::onServerTick);
         FactoryEvent.PlayerEvent.JOIN_EVENT.register(MinigamesController::onPlayerJoin);
+        FactoryEvent.PlayerEvent.REMOVED_EVENT.register(MinigamesController::onPlayerLeave);
     }
 }

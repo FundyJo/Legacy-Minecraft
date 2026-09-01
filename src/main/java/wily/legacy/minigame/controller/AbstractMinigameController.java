@@ -26,6 +26,9 @@ public abstract class AbstractMinigameController {
     public void playerLoadedIn(ServerPlayer player) {
     }
 
+    public void playerRemoved(ServerPlayer player) {
+    }
+
     public void playerReady(ServerPlayer player, boolean ready) {
     }
 
